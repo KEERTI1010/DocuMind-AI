@@ -13,12 +13,12 @@ export interface AuthResponse {
 }
 
 export async function registerUser(_fullName: string, email: string, password: string) {
-  const response = await api.post("/api/auth/register", { email, password });
+  const response = await api.post("/api/auth/register", { email: email.trim(), password });
   return response.data;
 }
 
 export async function loginUser(email: string, password: string) {
-  const response = await api.post<AuthResponse>("/api/auth/login", { email, password });
+  const response = await api.post<AuthResponse>("/api/auth/login", { email: email.trim(), password });
   return response.data;
 }
 

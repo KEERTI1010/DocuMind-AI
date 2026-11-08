@@ -1,58 +1,131 @@
-import { Upload, FileText, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Upload, FileText } from "lucide-react";
+import { uploadDocument, fetchDocuments, type DocumentItem } from "../services/documents";
 
-const recentDocs = [
-  { id: "1", name: "Q3 Financial Report.pdf", status: "Processed", size: "2.4 MB" },
-  { id: "2", name: "Employee Handbook.pdf", status: "Processed", size: "1.1 MB" },
-  { id: "3", name: "Research Notes.pdf", status: "Empty", size: "0.8 MB" },
-];
-
-const suggestions = [
-  "Summarize the main findings.",
-  "What are the key risks mentioned?",
-  "List all action items.",
-];
+const MAX_SIZE = 10 * 1024 * 1024;
 
 export default function Dashboard() {
+  const [documents, setDocuments] = useState<DocumentItem[]>([]);
+  const [dragging, setDragging] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const loadDocuments = async () => {
+    try {
+      const docs = await fetchDocuments();
+      setDocuments(docs);
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    loadDocuments();
+  }, []);
+
+  const handleFile = async (file: File) => {
+    setError("");
+    setMessage("");
+    if (file.type !== "application/pdf") {
+      setError("Only PDF files are allowed.");
+      return;
+    }
+    if (file.size > MAX_SIZE) {
+      setError("File too large. Maximum size is 10 MB.");
+      return;
+    }
+
+    setLoading(true);
+    setProgress(0);
+    try {
+      await uploadDocument(file, setProgress);
+      setMessage("Upload successful.");
+      await loadDocuments();
+    } catch (err: any) {
+      setError(err?.response?.data?.error || "Upload failed.");
+    } finally {
+      setLoading(false);
+      setProgress(0);
+    }
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleFile(file);
+  };
+
   return (
     <div className="space-y-8">
       <section>
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">Your knowledge, one question away.</h1>
         <p className="mt-2 max-w-2xl text-slate-600">
-          DocuMind AI helps you upload documents and ask questions about their contents. Sample data shown below is for UI preview only.
+          DocuMind AI helps you upload documents and ask questions about their contents.
         </p>
       </section>
 
-      <section className="rounded-2xl border-2 border-dashed border-indigo-200 bg-white p-8 text-center">
+      <section
+        className={`rounded-2xl border-2 border-dashed p-8 text-center transition ${dragging ? "border-indigo-400 bg-indigo-50" : "border-indigo-200 bg-white"}`}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={onDrop}
+      >
         <Upload className="mx-auto h-10 w-10 text-indigo-500" />
         <p className="mt-3 font-medium text-slate-900">Drag and drop a PDF here</p>
         <p className="text-sm text-slate-500">or click to browse. Max 10 MB.</p>
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+        >
+          Select PDF
+        </button>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="application/pdf"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleFile(file);
+            e.target.value = "";
+          }}
+        />
+        {loading && (
+          <div className="mt-4">
+            <div className="h-2 w-full rounded-full bg-slate-200">
+              <div className="h-2 rounded-full bg-indigo-600 transition-all" style={{ width: `${progress}%` }} />
+            </div>
+            <p className="mt-2 text-sm text-slate-600">Uploading... {progress}%</p>
+          </div>
+        )}
+        {message && <p className="mt-3 text-sm text-green-600">{message}</p>}
+        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold text-slate-900">Recent Documents</h2>
+        <h2 className="text-lg font-semibold text-slate-900">My Documents</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {recentDocs.map((doc) => (
+          {documents.length === 0 && <p className="text-sm text-slate-500">No documents uploaded yet.</p>}
+          {documents.map((doc) => (
             <div key={doc.id} className="rounded-xl border border-slate-200 bg-white p-4">
               <div className="flex items-center gap-3">
                 <FileText className="h-5 w-5 text-indigo-500" />
                 <div>
                   <p className="font-medium text-slate-900">{doc.name}</p>
-                  <p className="text-xs text-slate-500">{doc.size} · {doc.status}</p>
+                  <p className="text-xs text-slate-500">
+                    {(doc.size_bytes / 1024 / 1024).toFixed(2)} MB · {doc.status}
+                  </p>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2 className="text-lg font-semibold text-slate-900">Quick Start</h2>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {suggestions.map((s) => (
-            <button key={s} className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:border-indigo-300 hover:text-indigo-700">
-              <Sparkles className="mr-2 inline h-4 w-4" />
-              {s}
-            </button>
           ))}
         </div>
       </section>
