@@ -1,32 +1,49 @@
 # DocuMind AI
 
-DocuMind AI is a backend-first full-stack application for uploading PDF documents and asking questions about their contents using Retrieval-Augmented Generation (RAG).
+DocuMind AI is a full-stack document question-answering application. Users can upload PDF documents, extract and chunk their text, and ask natural-language questions about document contents using Retrieval-Augmented Generation (RAG).
 
-## Key Features
+## Problem Statement
 
-- Express.js backend with CORS and JSON parsing
-- Supabase Auth-based user registration, login, logout, and protected profile route
+Reading and searching large PDF documents is time-consuming. DocuMind AI helps users quickly retrieve relevant information from their own documents through an authenticated, document-scoped chat experience.
+
+## Features
+
+### Backend
+- Express.js API with CORS and JSON parsing
+- Supabase Auth registration, login, logout and protected profile route
 - Authenticated PDF upload with Multer memory storage
-- PDF text extraction using pdf-parse, with Gemini OCR fallback for scanned PDFs
-- Text chunking with overlap and persistent storage in Supabase
-- Document library endpoint for listing a user's documents
+- PDF text extraction with pdf-parse and Gemini OCR fallback for scanned PDFs
+- Text chunking with overlap and persistent storage
+- Document listing scoped to the authenticated user
 - Document-based question answering using Gemini and simple term-overlap retrieval
 - Conversation history and persistent chat messages
-- User ownership enforcement for documents, conversations, and messages
-- Health-check endpoints for backend and Supabase
+- User ownership enforcement for documents, conversations and messages
+
+### Frontend
+- React + Vite + TypeScript + Tailwind CSS dashboard
+- Authentication pages with validation and password visibility
+- Forgot password and reset password flows
+- Protected routes and session restoration
+- PDF upload with drag-and-drop, progress and validation
+- Document library with real metadata
+- AI assistant chat with conversation history and source references
+- Chat history page
+- Settings page with profile, security and logout
+- Development-only preview mode for UI testing
 
 ## Technology Stack
 
-- Node.js
-- Express.js
-- Supabase (Auth, Database, Storage)
-- Google Gemini API
-- pdf-parse
-- Multer
-- dotenv
-- CORS
-- bcryptjs
-- jsonwebtoken
+- Frontend: React, Vite, TypeScript, Tailwind CSS, React Router, Axios, Lucide React
+- Backend: Node.js, Express.js, Multer, pdf-parse
+- Database/Auth/Storage: Supabase
+- AI: Google Gemini API
+
+## System Architecture
+
+```text
+Frontend (React/Vite) -> Axios -> Express API -> Supabase (Auth/DB/Storage)
+                                    -> Google Gemini (OCR + RAG answers)
+```
 
 ## Project Structure
 
@@ -41,6 +58,18 @@ DocuMind-AI/
 │   ├── utils/
 │   ├── server.js
 │   └── package.json
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── hooks/
+│   │   ├── layouts/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── types/
+│   │   └── utils/
+│   ├── .env.example
+│   └── package.json
 ├── .gitignore
 └── README.md
 ```
@@ -48,19 +77,28 @@ DocuMind-AI/
 ## Prerequisites
 
 - Node.js 18+
-- A Supabase project
-- A Google Gemini API key
+- Supabase project
+- Google Gemini API key
 
-## Backend Setup
+## Installation
 
-1. Install dependencies:
+Backend:
 
 ```bash
 cd backend
 npm install
 ```
 
-2. Create a `.env` file in `backend/` using placeholder values:
+Frontend:
+
+```bash
+cd frontend
+npm install
+```
+
+## Environment Variables
+
+Backend `backend/.env`:
 
 ```env
 PORT=5000
@@ -70,51 +108,62 @@ SUPABASE_SECRET_KEY=your-secret-key
 GEMINI_API_KEY=your-gemini-api-key
 ```
 
-3. Ensure a private Supabase Storage bucket named `documents` exists.
+Frontend `frontend/.env`:
 
-## Running the Backend
+```env
+VITE_API_BASE_URL=http://localhost:5000
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+VITE_DEV_PREVIEW=false
+```
 
-Development mode:
+## Running the Application
+
+Backend:
 
 ```bash
+cd backend
 npm run dev
 ```
 
-Production mode:
+Frontend:
 
 ```bash
-npm start
+cd frontend
+npm run dev
 ```
 
 ## API Endpoint Overview
 
-- `GET /` - Backend health check
-- `GET /api/health/supabase` - Supabase health check
-- `POST /api/auth/register` - Register a user
-- `POST /api/auth/login` - Login a user
-- `POST /api/auth/logout` - Logout a user
-- `GET /api/auth/me` - Get authenticated user
-- `POST /api/documents/upload` - Upload a PDF
-- `GET /api/documents` - List user's documents
-- `POST /api/documents/:documentId/ask` - Ask a question about a document
-- `POST /api/documents/:documentId/conversations` - Create a conversation
-- `GET /api/documents/:documentId/conversations` - List conversations
-- `POST /api/conversations/:conversationId/messages` - Send a message
-- `GET /api/conversations/:conversationId/messages` - Get messages
+- `GET /` and `GET /api/health/supabase`
+- `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`
+- `POST /api/documents/upload`, `GET /api/documents`
+- `POST /api/documents/:documentId/ask`
+- `POST /api/documents/:documentId/conversations`, `GET /api/documents/:documentId/conversations`
+- `POST /api/conversations/:conversationId/messages`, `GET /api/conversations/:conversationId/messages`
 
-## Current Limitations
+## Database and Supabase Integration
 
-- No frontend is implemented yet.
-- Retrieval uses simple term overlap instead of embeddings/vector search.
-- OCR depends on Gemini availability and may be slower for large scanned PDFs.
-- No automated test suite is included yet.
-
-## Future Improvements
-
-- Add a frontend application for document upload and chat.
-- Replace simple retrieval with embedding-based vector search.
-- Add automated tests and CI checks.
+- Supabase Auth manages users and sessions.
+- The `documents` table stores document metadata.
+- The `document_chunks` table stores extracted text chunks.
+- The `conversations` and `messages` tables store chat history.
+- A private Storage bucket named `documents` stores uploaded PDFs.
+- The backend admin client bypasses RLS and enforces ownership explicitly.
 
 ## AI Tools and Third-Party Libraries Disclosure
 
-This project uses Google Gemini for OCR and question answering, Supabase for authentication, database, and storage, and several open-source npm packages listed in `backend/package.json`.
+- Google Gemini is used for OCR and question answering.
+- Supabase is used for authentication, database and storage.
+- Additional libraries include Express, React, Vite, Tailwind CSS, Axios, Lucide React, pdf-parse and Multer.
+
+## Current Limitations
+
+- Frontend authentication flows have not been fully verified with real Supabase accounts due to email rate limits.
+- Development preview mode is available for UI testing but does not bypass backend authentication.
+- Retrieval uses simple term overlap instead of embeddings/vector search.
+
+## Future Improvements
+
+- Add embedding-based vector search for better retrieval.
+- Add automated tests and CI for frontend and backend.
