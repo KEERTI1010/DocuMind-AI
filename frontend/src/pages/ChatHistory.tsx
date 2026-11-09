@@ -37,24 +37,24 @@ export default function ChatHistory() {
     load();
   }, []);
 
-  if (loading) return <p className="text-sm text-slate-500">Loading conversations...</p>;
-  if (error) return <p className="text-sm text-red-600">{error}</p>;
-  if (items.length === 0) return <p className="text-sm text-slate-500">No conversations yet.</p>;
+  if (loading) return <p className="text-sm theme-text-muted">Loading conversations...</p>;
+  if (error) return <p className="text-sm text-red-500">{error}</p>;
+  if (items.length === 0) return <p className="text-sm theme-text-muted">No conversations yet.</p>;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900">Chat History</h1>
+      <h1 className="text-2xl font-bold theme-text">Chat History</h1>
       <div className="mt-6 space-y-3">
         {items.map(({ conversation, documentName }) => (
           <button
             key={conversation.id}
             onClick={() => navigate(`/assistant?doc=${conversation.document_id}&conv=${conversation.id}`)}
-            className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-indigo-300"
+            className="flex w-full items-center gap-3 rounded-xl border theme-border theme-surface p-4 text-left hover:border-indigo-300"
           >
             <MessageSquare className="h-5 w-5 text-indigo-500" />
             <div>
-              <p className="font-medium text-slate-900">{conversation.title}</p>
-              <p className="text-xs text-slate-500">{documentName} · {new Date(conversation.created_at).toLocaleString()}</p>
+              <p className="font-medium theme-text">{conversation.title}</p>
+              <p className="text-xs theme-text-muted">{documentName} · {new Date(conversation.created_at).toLocaleString()}</p>
             </div>
           </button>
         ))}

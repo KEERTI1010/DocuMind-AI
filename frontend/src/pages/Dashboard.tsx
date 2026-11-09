@@ -62,14 +62,14 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       <section>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Your knowledge, one question away.</h1>
-        <p className="mt-2 max-w-2xl text-slate-600">
+        <h1 className="text-3xl font-bold tracking-tight theme-text">Your knowledge, one question away.</h1>
+        <p className="mt-2 max-w-2xl theme-text-muted">
           DocuMind AI helps you upload documents and ask questions about their contents.
         </p>
       </section>
 
       <section
-        className={`rounded-2xl border-2 border-dashed p-8 text-center transition ${dragging ? "border-indigo-400 bg-indigo-50" : "border-indigo-200 bg-white"}`}
+        className={`rounded-2xl border-2 border-dashed p-8 text-center transition ${dragging ? "border-indigo-400 theme-primary-soft" : "border-indigo-200 dark:border-indigo-900 theme-surface"}`}
         onDragOver={(e) => {
           e.preventDefault();
           setDragging(true);
@@ -78,8 +78,8 @@ export default function Dashboard() {
         onDrop={onDrop}
       >
         <Upload className="mx-auto h-10 w-10 text-indigo-500" />
-        <p className="mt-3 font-medium text-slate-900">Drag and drop a PDF here</p>
-        <p className="text-sm text-slate-500">or click to browse. Max 10 MB.</p>
+        <p className="mt-3 font-medium theme-text">Drag and drop a PDF here</p>
+        <p className="text-sm theme-text-muted">or click to browse. Max 10 MB.</p>
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
@@ -100,27 +100,27 @@ export default function Dashboard() {
         />
         {loading && (
           <div className="mt-4">
-            <div className="h-2 w-full rounded-full bg-slate-200">
+            <div className="h-2 w-full rounded-full theme-surface-alt">
               <div className="h-2 rounded-full bg-indigo-600 transition-all" style={{ width: `${progress}%` }} />
             </div>
-            <p className="mt-2 text-sm text-slate-600">Uploading... {progress}%</p>
+            <p className="mt-2 text-sm theme-text-muted">Uploading... {progress}%</p>
           </div>
         )}
-        {message && <p className="mt-3 text-sm text-green-600">{message}</p>}
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+        {message && <p className="mt-3 text-sm text-green-500">{message}</p>}
+        {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold text-slate-900">My Documents</h2>
+        <h2 className="text-lg font-semibold theme-text">My Documents</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {documents.length === 0 && <p className="text-sm text-slate-500">No documents uploaded yet.</p>}
+          {documents.length === 0 && <p className="text-sm theme-text-muted">No documents uploaded yet.</p>}
           {documents.map((doc) => (
-            <div key={doc.id} className="rounded-xl border border-slate-200 bg-white p-4">
+            <div key={doc.id} className="rounded-xl border theme-border theme-surface p-4">
               <div className="flex items-center gap-3">
                 <FileText className="h-5 w-5 text-indigo-500" />
                 <div>
-                  <p className="font-medium text-slate-900">{doc.name}</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="font-medium theme-text">{doc.name}</p>
+                  <p className="text-xs theme-text-muted">
                     {(doc.size_bytes / 1024 / 1024).toFixed(2)} MB · {doc.status}
                   </p>
                 </div>

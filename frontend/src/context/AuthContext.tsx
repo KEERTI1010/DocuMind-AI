@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const metadata: any = {};
     if (updates.displayName !== undefined) metadata.display_name = updates.displayName;
     if (updates.avatarUrl !== undefined) metadata.avatar_url = updates.avatarUrl;
-    const { data, error } = await supabase.auth.updateUser({ user_metadata: metadata });
+    const { data, error } = await supabase.auth.updateUser({ data: metadata });
     if (error) throw error;
     if (data.user) {
       setUser((prev) => {

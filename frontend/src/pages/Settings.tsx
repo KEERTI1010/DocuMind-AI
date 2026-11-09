@@ -23,41 +23,41 @@ export default function Settings() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
+      <h1 className="text-2xl font-bold theme-text">Settings</h1>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-slate-900">Profile</h2>
+      <section className="rounded-xl border theme-border theme-surface p-6">
+        <h2 className="text-lg font-semibold theme-text">Profile</h2>
         {user ? (
           <div className="mt-4 flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300">
               <User className="h-7 w-7" />
             </div>
             <div>
-              <p className="text-base font-medium text-slate-900">{user.email}</p>
-              <p className="text-xs text-slate-500">DocuMind AI account</p>
+              <p className="text-base font-medium theme-text">{user.email}</p>
+              <p className="text-xs theme-text-muted">DocuMind AI account</p>
             </div>
           </div>
         ) : (
-          <p className="mt-4 text-sm text-slate-500">User profile is unavailable.</p>
+          <p className="mt-4 text-sm theme-text-muted">User profile is unavailable.</p>
         )}
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-slate-900">Account Preferences</h2>
-        <div className="mt-4 flex items-center gap-3 text-sm text-slate-700">
-          <Palette className="h-5 w-5 text-slate-400" />
+      <section className="rounded-xl border theme-border theme-surface p-6">
+        <h2 className="text-lg font-semibold theme-text">Account Preferences</h2>
+        <div className="mt-4 flex items-center gap-3 text-sm theme-text-muted">
+          <Palette className="h-5 w-5" />
           <span>Theme and notification preferences will be available soon.</span>
         </div>
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-slate-900">Security</h2>
+      <section className="rounded-xl border theme-border theme-surface p-6">
+        <h2 className="text-lg font-semibold theme-text">Security</h2>
         <div className="mt-4">
-          <Link to="/forgot-password" className="text-sm font-medium text-indigo-600 hover:underline">Reset password</Link>
+          <Link to="/forgot-password" className="text-sm font-medium text-indigo-500 hover:underline">Reset password</Link>
         </div>
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6">
+      <section className="rounded-xl border theme-border theme-surface p-6">
         <button
           onClick={() => setShowLogoutModal(true)}
           className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
@@ -69,14 +69,14 @@ export default function Settings() {
 
       {showLogoutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-lg">
-            <h3 className="text-lg font-semibold text-slate-900">Confirm Logout</h3>
-            <p className="mt-2 text-sm text-slate-600">Are you sure you want to log out of DocuMind AI?</p>
+          <div className="w-full max-w-sm rounded-xl theme-surface p-6 shadow-lg">
+            <h3 className="text-lg font-semibold theme-text">Confirm Logout</h3>
+            <p className="mt-2 text-sm theme-text-muted">Are you sure you want to log out of DocuMind AI?</p>
             <div className="mt-5 flex gap-3">
               <button
                 onClick={() => setShowLogoutModal(false)}
                 disabled={loggingOut}
-                className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                className="flex-1 rounded-lg border theme-border theme-surface-alt px-4 py-2 text-sm font-medium theme-text hover:theme-surface disabled:opacity-60"
               >
                 Cancel
               </button>

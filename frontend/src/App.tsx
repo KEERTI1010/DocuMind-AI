@@ -22,8 +22,8 @@ const navItems = [
 
 function Sidebar() {
   return (
-    <aside className="w-64 shrink-0 border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-      <div className="flex h-16 items-center gap-2 px-6 font-semibold text-slate-900 dark:text-slate-100">
+    <aside className="w-64 shrink-0 border-r theme-border theme-surface">
+      <div className="flex h-16 items-center gap-2 px-6 font-semibold theme-text">
         <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">D</span>
         DocuMind AI
       </div>
@@ -36,7 +36,7 @@ function Sidebar() {
               `block rounded-lg px-3 py-2 text-sm font-medium ${
                 isActive
                   ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300"
-                  : "text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
+                  : "theme-text-muted hover:theme-surface-alt"
               }`
             }
           >
@@ -65,7 +65,7 @@ function Layout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div className="flex min-h-screen theme-bg theme-text">
       <Sidebar />
       <main className="flex-1 p-6">
         <Routes>

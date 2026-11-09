@@ -93,19 +93,19 @@ export default function Assistant() {
 
   return (
     <div className="flex h-[calc(100vh-3rem)] flex-col">
-      <h1 className="text-2xl font-bold text-slate-900">AI Assistant</h1>
-      <p className="mt-1 text-sm text-slate-600">Ask questions about your uploaded documents.</p>
+      <h1 className="text-2xl font-bold theme-text">AI Assistant</h1>
+      <p className="mt-1 text-sm theme-text-muted">Ask questions about your uploaded documents.</p>
 
       <div className="mt-4 flex flex-1 gap-4 overflow-hidden">
-        <aside className="w-64 shrink-0 rounded-xl border border-slate-200 bg-white p-4">
-          <label className="block text-sm font-medium text-slate-700">Document</label>
+        <aside className="w-64 shrink-0 rounded-xl border theme-border theme-surface p-4">
+          <label className="block text-sm font-medium theme-text-muted">Document</label>
           {docsLoading ? (
-            <p className="mt-2 text-sm text-slate-500">Loading...</p>
+            <p className="mt-2 text-sm theme-text-muted">Loading...</p>
           ) : (
             <select
               value={selectedDocId}
               onChange={(e) => setSelectedDocId(e.target.value)}
-              className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+              className="mt-2 w-full rounded-lg border theme-border theme-surface-alt px-3 py-2 text-sm theme-text focus:border-indigo-500 focus:outline-none"
             >
               <option value="">Select a document</option>
               {documents.map((doc) => (
@@ -117,13 +117,13 @@ export default function Assistant() {
           )}
           {conversations.length > 0 && (
             <div className="mt-4">
-              <p className="text-xs font-medium uppercase text-slate-500">Conversations</p>
+              <p className="text-xs font-medium uppercase theme-text-muted">Conversations</p>
               <div className="mt-2 space-y-1">
                 {conversations.map((c) => (
                   <button
                     key={c.id}
                     onClick={() => setSelectedConvId(c.id)}
-                    className={`block w-full rounded-lg px-2 py-1 text-left text-sm ${selectedConvId === c.id ? "bg-indigo-50 text-indigo-700" : "text-slate-600 hover:bg-slate-50"}`}
+                    className={`block w-full rounded-lg px-2 py-1 text-left text-sm ${selectedConvId === c.id ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300" : "theme-text-muted hover:theme-surface-alt"}`}
                   >
                     {c.title}
                   </button>
@@ -133,17 +133,17 @@ export default function Assistant() {
           )}
         </aside>
 
-        <section className="flex flex-1 flex-col rounded-xl border border-slate-200 bg-white">
+        <section className="flex flex-1 flex-col rounded-xl border theme-border theme-surface">
           <div className="flex-1 space-y-4 overflow-y-auto p-4">
-            {!selectedDocId && <p className="text-sm text-slate-500">Select a document to start chatting.</p>}
+            {!selectedDocId && <p className="text-sm theme-text-muted">Select a document to start chatting.</p>}
             {selectedDocId && messages.length === 0 && !loading && (
-              <p className="text-sm text-slate-500">No messages yet. Ask a question.</p>
+              <p className="text-sm theme-text-muted">No messages yet. Ask a question.</p>
             )}
             {messages.map((m) => (
-              <div key={m.id} className={`max-w-[80%] rounded-xl px-4 py-3 text-sm ${m.role === "user" ? "ml-auto bg-indigo-600 text-white" : "bg-slate-100 text-slate-900"}`}>
+              <div key={m.id} className={`max-w-[80%] rounded-xl px-4 py-3 text-sm ${m.role === "user" ? "ml-auto bg-indigo-600 text-white" : "theme-surface-alt theme-text"}`}>
                 <p className="whitespace-pre-wrap">{m.content}</p>
                 {m.role === "assistant" && m.sources?.length > 0 && (
-                  <div className="mt-2 border-t border-slate-200 pt-2 text-xs text-slate-600">
+                  <div className="mt-2 border-t theme-border pt-2 text-xs theme-text-muted">
                     Sources:{" "}
                     {m.sources.map((s, i) => (
                       <span key={i} className="mr-2">
@@ -155,11 +155,11 @@ export default function Assistant() {
                 )}
               </div>
             ))}
-            {loading && <p className="text-sm text-slate-500">Thinking...</p>}
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {loading && <p className="text-sm theme-text-muted">Thinking...</p>}
+            {error && <p className="text-sm text-red-500">{error}</p>}
           </div>
 
-          <div className="border-t border-slate-200 p-4">
+          <div className="border-t theme-border p-4">
             <div className="flex gap-2">
               <input
                 value={question}
@@ -171,7 +171,7 @@ export default function Assistant() {
                   }
                 }}
                 placeholder="Ask a question about this document..."
-                className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+                className="flex-1 rounded-lg border theme-border theme-surface-alt px-3 py-2 text-sm theme-text focus:border-indigo-500 focus:outline-none"
                 disabled={!selectedDocId || loading}
               />
               <button

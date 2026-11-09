@@ -1,3 +1,53 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface-alt: #f1f5f9;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --text-faint: #94a3b8;
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-soft: #eef2ff;
+    --danger: #dc2626;
+    --danger-hover: #b91c1c;
+    --success: #16a34a;
+  }
+
+  .dark {
+    --bg: #020617;
+    --surface: #0f172a;
+    --surface-alt: #1e293b;
+    --border: #334155;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --text-faint: #64748b;
+    --primary: #818cf8;
+    --primary-hover: #6366f1;
+    --primary-soft: #1e1b4b;
+    --danger: #f87171;
+    --danger-hover: #ef4444;
+    --success: #4ade80;
+  }
+}
+
+@layer utilities {
+  .theme-bg { background-color: var(--bg); }
+  .theme-surface { background-color: var(--surface); }
+  .theme-surface-alt { background-color: var(--surface-alt); }
+  .theme-border { border-color: var(--border); }
+  .theme-text { color: var(--text); }
+  .theme-text-muted { color: var(--text-muted); }
+  .theme-text-faint { color: var(--text-faint); }
+  .theme-primary { background-color: var(--primary); }
+  .theme-primary-text { color: var(--primary); }
+  .theme-primary-hover:hover { background-color: var(--primary-hover); }
+  .theme-primary-border { border-color: var(--primary); }
+  .theme-danger { background-color: var(--danger); }
+  .theme-success { color: var(--success); }
+}
