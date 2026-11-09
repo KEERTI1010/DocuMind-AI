@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/uploadMiddleware");
 const { authenticate } = require("../middleware/authMiddleware");
-const { uploadDocument, listDocuments, askDocument } = require("../controllers/documentController");
+const { uploadDocument, listDocuments, askDocument, getSignedUrl } = require("../controllers/documentController");
 
 router.post("/upload", authenticate, upload.single("file"), (err, req, res, next) => {
   if (err) {
@@ -16,5 +16,6 @@ router.post("/upload", authenticate, upload.single("file"), (err, req, res, next
 
 router.get("/", authenticate, listDocuments);
 router.post("/:documentId/ask", authenticate, askDocument);
+router.get("/:documentId/download", authenticate, getSignedUrl);
 
 module.exports = router;

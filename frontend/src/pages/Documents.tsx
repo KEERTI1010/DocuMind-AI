@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { FileText, RefreshCw } from "lucide-react";
-import { fetchDocuments, type DocumentItem } from "../services/documents";
+import { FileText, RefreshCw, Download, Eye } from "lucide-react";
+import { fetchDocuments, getDownloadUrl, type DocumentItem } from "../services/documents";
 
 export default function Documents() {
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [actionId, setActionId] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -23,6 +24,37 @@ export default function Documents() {
   useEffect(() => {
     load();
   }, []);
+
+  const openDocument = async (doc: DocumentItem) => {
+    setActionId(doc.id);
+    setError("");
+    try {
+      const url = await getDownloadUrl(doc.id);
+      window.location.href = url;
+    } catch (err: any) {
+      setError(err?.response?.data?.error || "Failed to open document.");
+    } finally {
+      setActionId("");
+    }
+  };
+
+  const downloadDocument = async (doc: DocumentItem) => {
+    setActionId(doc.id);
+    setError("");
+    try {
+      const url = await getDownloadUrl(doc.id);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = doc.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (err: any) {
+      setError(err?.response?.data?.error || "Failed to download document.");
+    } finally {
+      setActionId("");
+    }
+  };
 
   return (
     <div>
@@ -52,6 +84,24 @@ export default function Documents() {
                 </p>
                 <p className="text-xs text-slate-400">{new Date(doc.created_at).toLocaleString()}</p>
               </div>
+            </div>
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={() => openDocument(doc)}
+                disabled={actionId === doc.id}
+                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+              >
+                <Eye className="h-3 w-3" />
+                View
+              </button>
+              <button
+                onClick={() => downloadDocument(doc)}
+                disabled={actionId === doc.id}
+                className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-2 py-1 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+              >
+                <Download className="h-3 w-3" />
+                Download
+              </button>
             </div>
           </div>
         ))}

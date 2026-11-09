@@ -223,4 +223,36 @@ async function askDocument(req, res) {
   }
 }
 
-module.exports = { uploadDocument, listDocuments, askDocument };
+async function getSignedUrl(req, res) {
+  const user = req.user;
+  const { documentId } = req.params;
+
+  try {
+    const { data: document, error: docError } = await supabaseAdmin
+      .from("documents")
+      .select("id, storage_path")
+      .eq("id", documentId)
+      .eq("user_id", user.id)
+      .single();
+
+    if (docError || !document) {
+      return res.status(404).json({ error: "Document not found" });
+    }
+
+    const { data, error } = await supabaseAdmin.storage
+      .from("documents")
+      .createSignedUrl(document.storage_path, 3600);
+
+    const signedUrl = data?.signedUrl;
+
+    if (error || !signedUrl || typeof signedUrl !== "string") {
+      return res.status(500).json({ error: "Failed to generate download URL" });
+    }
+
+    return res.json({ signedUrl });
+  } catch (err) {
+    return res.status(500).json({ error: "Failed to generate download URL" });
+  }
+}
+
+module.exports = { uploadDocument, listDocuments, askDocument, getSignedUrl };

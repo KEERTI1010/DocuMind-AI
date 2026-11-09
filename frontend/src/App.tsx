@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, NavLink, useLocation } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Documents from "./pages/Documents";
 import Assistant from "./pages/Assistant";
@@ -45,7 +47,7 @@ function Sidebar() {
 
 function Layout() {
   const location = useLocation();
-  const authRoutes = ["/login", "/register"];
+  const authRoutes = ["/login", "/register", "/forgot-password", "/reset-password"];
   const isAuth = authRoutes.includes(location.pathname);
 
   if (isAuth) {
@@ -75,10 +77,6 @@ function Layout() {
   );
 }
 
-import { AuthProvider } from "./context/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute";
-
-// inside App return:
 export default function App() {
   return (
     <BrowserRouter>

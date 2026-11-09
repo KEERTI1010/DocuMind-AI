@@ -29,3 +29,12 @@ export async function fetchDocuments() {
   const response = await api.get("/api/documents");
   return response.data.documents as DocumentItem[];
 }
+
+export async function getDownloadUrl(documentId: string) {
+  const response = await api.get(`/api/documents/${documentId}/download`);
+  const url = response?.data?.signedUrl;
+  if (typeof url !== "string" || !url.startsWith("http")) {
+    throw new Error("Invalid signed URL returned by server");
+  }
+  return url;
+}

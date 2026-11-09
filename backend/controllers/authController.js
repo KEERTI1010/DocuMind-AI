@@ -22,7 +22,13 @@ async function register(req, res) {
   }
 
   try {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${process.env.FRONTEND_URL || "http://localhost:5173"}/login`,
+      },
+    });
 
     if (error) {
       return res.status(400).json({ error: error.message });
