@@ -86,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("access_token");
     delete api.defaults.headers.common.Authorization;
     setUser(null);
-    navigate("/login");
+    navigate("/");
   };
 
   return (

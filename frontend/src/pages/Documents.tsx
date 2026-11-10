@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { FileText, RefreshCw, Download, Eye } from "lucide-react";
+import { gsap } from "gsap";
 import { fetchDocuments, getDownloadUrl, type DocumentItem } from "../services/documents";
+import FadeIn from "../components/FadeIn";
 
 export default function Documents() {
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
@@ -24,6 +26,14 @@ export default function Documents() {
   useEffect(() => {
     load();
   }, []);
+
+  useEffect(() => {
+    gsap.fromTo(
+      ".doc-card",
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.4, stagger: 0.08, ease: "power2.out" }
+    );
+  }, [documents]);
 
   const openDocument = async (doc: DocumentItem) => {
     setActionId(doc.id);
@@ -58,13 +68,15 @@ export default function Documents() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold theme-text">My Documents</h1>
-        <button onClick={load} className="inline-flex items-center gap-2 rounded-lg border theme-border theme-surface px-3 py-2 text-sm font-medium theme-text hover:theme-surface-alt">
-          <RefreshCw className="h-4 w-4" />
-          Refresh
-        </button>
-      </div>
+      <FadeIn>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold theme-text">My Documents</h1>
+          <button onClick={load} className="inline-flex items-center gap-2 rounded-lg border theme-border theme-surface px-3 py-2 text-sm font-medium theme-text hover:theme-surface-alt transition">
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </button>
+        </div>
+      </FadeIn>
 
       {loading && <p className="mt-6 text-sm theme-text-muted">Loading documents...</p>}
       {error && <p className="mt-6 text-sm text-red-500">{error}</p>}
@@ -74,7 +86,7 @@ export default function Documents() {
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {documents.map((doc) => (
-          <div key={doc.id} className="rounded-xl border theme-border theme-surface p-4">
+          <div key={doc.id} className="doc-card rounded-xl border theme-border theme-surface p-4 theme-shadow hover:theme-shadow-lg hover:-translate-y-1 transition">
             <div className="flex items-center gap-3">
               <FileText className="h-5 w-5 text-indigo-500" />
               <div>
@@ -89,7 +101,7 @@ export default function Documents() {
               <button
                 onClick={() => openDocument(doc)}
                 disabled={actionId === doc.id}
-                className="inline-flex items-center gap-1 rounded-lg border theme-border theme-surface px-2 py-1 text-xs font-medium theme-text hover:theme-surface-alt disabled:opacity-60"
+                className="inline-flex items-center gap-1 rounded-lg border theme-border theme-surface px-2 py-1 text-xs font-medium theme-text hover:theme-surface-alt disabled:opacity-60 transition"
               >
                 <Eye className="h-3 w-3" />
                 View
@@ -97,7 +109,7 @@ export default function Documents() {
               <button
                 onClick={() => downloadDocument(doc)}
                 disabled={actionId === doc.id}
-                className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-2 py-1 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+                className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-2 py-1 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-60 transition"
               >
                 <Download className="h-3 w-3" />
                 Download

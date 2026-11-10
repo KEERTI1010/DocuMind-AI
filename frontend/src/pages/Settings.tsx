@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { LogOut, User, Palette } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import { Link } from "react-router-dom";
+import { gsap } from "gsap";
+import FadeIn from "../components/FadeIn";
 
 export default function Settings() {
   const { user, logout } = useAuth();
@@ -21,11 +23,21 @@ export default function Settings() {
     }
   };
 
+  useEffect(() => {
+    gsap.fromTo(
+      ".settings-card",
+      { opacity: 0, y: 16 },
+      { opacity: 1, y: 0, duration: 0.4, stagger: 0.08, ease: "power2.out" }
+    );
+  }, []);
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold theme-text">Settings</h1>
+      <FadeIn>
+        <h1 className="text-2xl font-bold theme-text">Settings</h1>
+      </FadeIn>
 
-      <section className="rounded-xl border theme-border theme-surface p-6">
+      <section className="settings-card rounded-xl border theme-border theme-surface p-6 theme-shadow">
         <h2 className="text-lg font-semibold theme-text">Profile</h2>
         {user ? (
           <div className="mt-4 flex items-center gap-4">
@@ -42,25 +54,17 @@ export default function Settings() {
         )}
       </section>
 
-      <section className="rounded-xl border theme-border theme-surface p-6">
-        <h2 className="text-lg font-semibold theme-text">Account Preferences</h2>
-        <div className="mt-4 flex items-center gap-3 text-sm theme-text-muted">
-          <Palette className="h-5 w-5" />
-          <span>Theme and notification preferences will be available soon.</span>
-        </div>
-      </section>
-
-      <section className="rounded-xl border theme-border theme-surface p-6">
+      <section className="settings-card rounded-xl border theme-border theme-surface p-6 theme-shadow">
         <h2 className="text-lg font-semibold theme-text">Security</h2>
         <div className="mt-4">
           <Link to="/forgot-password" className="text-sm font-medium text-indigo-500 hover:underline">Reset password</Link>
         </div>
       </section>
 
-      <section className="rounded-xl border theme-border theme-surface p-6">
+      <section className="settings-card rounded-xl border theme-border theme-surface p-6 theme-shadow">
         <button
           onClick={() => setShowLogoutModal(true)}
-          className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+          className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition"
         >
           <LogOut className="h-4 w-4" />
           Logout
@@ -76,14 +80,14 @@ export default function Settings() {
               <button
                 onClick={() => setShowLogoutModal(false)}
                 disabled={loggingOut}
-                className="flex-1 rounded-lg border theme-border theme-surface-alt px-4 py-2 text-sm font-medium theme-text hover:theme-surface disabled:opacity-60"
+                className="flex-1 rounded-lg border theme-border theme-surface-alt px-4 py-2 text-sm font-medium theme-text hover:theme-surface disabled:opacity-60 transition"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmLogout}
                 disabled={loggingOut}
-                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
+                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60 transition"
               >
                 {loggingOut ? "Logging out..." : "Yes, Logout"}
               </button>

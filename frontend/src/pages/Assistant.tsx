@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Send } from "lucide-react";
+import { gsap } from "gsap";
 import { fetchDocuments, type DocumentItem } from "../services/documents";
 import {
   fetchConversations,
@@ -66,6 +67,20 @@ export default function Assistant() {
       .then(setMessages)
       .catch(() => setError("Failed to load messages."));
   }, [selectedConvId]);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  useEffect(() => {
+    gsap.fromTo(
+      ".message-bubble",
+      { opacity: 0, y: 12 },
+      { opacity: 1, y: 0, duration: 0.3, stagger: 0.05, ease: "power2.out" }
+    );
+  }, [messages]);
 
   const handleSend = async () => {
     const q = question.trim();
@@ -140,7 +155,7 @@ export default function Assistant() {
               <p className="text-sm theme-text-muted">No messages yet. Ask a question.</p>
             )}
             {messages.map((m) => (
-              <div key={m.id} className={`max-w-[80%] rounded-xl px-4 py-3 text-sm ${m.role === "user" ? "ml-auto bg-indigo-600 text-white" : "theme-surface-alt theme-text"}`}>
+              <div key={m.id} className={`message-bubble max-w-[80%] rounded-xl px-4 py-3 text-sm ${m.role === "user" ? "ml-auto bg-indigo-600 text-white" : "theme-surface-alt theme-text"}`}>
                 <p className="whitespace-pre-wrap">{m.content}</p>
                 {m.role === "assistant" && m.sources?.length > 0 && (
                   <div className="mt-2 border-t theme-border pt-2 text-xs theme-text-muted">
@@ -157,6 +172,7 @@ export default function Assistant() {
             ))}
             {loading && <p className="text-sm theme-text-muted">Thinking...</p>}
             {error && <p className="text-sm text-red-500">{error}</p>}
+            <div ref={messagesEndRef} />
           </div>
 
           <div className="border-t theme-border p-4">
