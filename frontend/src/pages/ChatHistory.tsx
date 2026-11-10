@@ -63,7 +63,7 @@ export default function ChatHistory() {
             onClick={() => navigate(`/assistant?doc=${conversation.document_id}&conv=${conversation.id}`)}
             className="history-card flex w-full items-center gap-3 rounded-xl border theme-border theme-surface p-4 text-left hover:theme-shadow-lg hover:-translate-y-0.5 transition"
           >
-            <MessageSquare className="h-5 w-5 text-indigo-500" />
+            <MessageSquare className="h-5 w-5 theme-primary-text" />
             <div>
               <p className="font-medium theme-text">{conversation.title}</p>
               <p className="text-xs theme-text-muted">{documentName} · {new Date(conversation.created_at).toLocaleString()}</p>

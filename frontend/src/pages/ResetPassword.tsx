@@ -55,8 +55,8 @@ export default function ResetPassword() {
             <PasswordField label="New Password" value={password} onChange={setPassword} />
             <PasswordField label="Confirm Password" value={confirmPassword} onChange={setConfirmPassword} />
             {error && <p className="text-sm text-red-500">{error}</p>}
-            {success && <p className="text-sm text-green-500">{success}</p>}
-            <button type="submit" disabled={loading} className="w-full rounded-lg bg-indigo-600 py-2 font-medium text-white hover:bg-indigo-700 disabled:opacity-60">{loading ? "Updating..." : "Update password"}</button>
+            {success && <p className="text-sm theme-success">{success}</p>}
+            <button type="submit" disabled={loading} className="w-full rounded-lg theme-primary py-2 font-medium text-white hover:theme-primary-hover disabled:opacity-60">{loading ? "Updating..." : "Update password"}</button>
           </form>
         )}
       </div>

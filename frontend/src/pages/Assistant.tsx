@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Send } from "lucide-react";
-import { gsap } from "gsap";
+import { Send, X } from "lucide-react";
+import MicrophoneButton from "../components/MicrophoneButton";
 import { fetchDocuments, type DocumentItem } from "../services/documents";
 import {
   fetchConversations,
@@ -74,14 +74,6 @@ export default function Assistant() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  useEffect(() => {
-    gsap.fromTo(
-      ".message-bubble",
-      { opacity: 0, y: 12 },
-      { opacity: 1, y: 0, duration: 0.3, stagger: 0.05, ease: "power2.out" }
-    );
-  }, [messages]);
-
   const handleSend = async () => {
     const q = question.trim();
     if (!q || !selectedDocId) return;
@@ -106,6 +98,10 @@ export default function Assistant() {
     }
   };
 
+  const handleTranscript = (text: string) => {
+    setQuestion((prev) => (prev ? `${prev} ${text}` : text));
+  };
+
   return (
     <div className="flex h-[calc(100vh-3rem)] flex-col">
       <h1 className="text-2xl font-bold theme-text">AI Assistant</h1>
@@ -120,7 +116,7 @@ export default function Assistant() {
             <select
               value={selectedDocId}
               onChange={(e) => setSelectedDocId(e.target.value)}
-              className="mt-2 w-full rounded-lg border theme-border theme-surface-alt px-3 py-2 text-sm theme-text focus:border-indigo-500 focus:outline-none"
+              className="mt-2 w-full rounded-lg border theme-border theme-surface-alt px-3 py-2 text-sm theme-text focus:border-theme-primary focus:outline-none"
             >
               <option value="">Select a document</option>
               {documents.map((doc) => (
@@ -138,7 +134,7 @@ export default function Assistant() {
                   <button
                     key={c.id}
                     onClick={() => setSelectedConvId(c.id)}
-                    className={`block w-full rounded-lg px-2 py-1 text-left text-sm ${selectedConvId === c.id ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300" : "theme-text-muted hover:theme-surface-alt"}`}
+                    className={`block w-full rounded-lg px-2 py-1 text-left text-sm ${selectedConvId === c.id ? "theme-nav-selected" : "theme-text hover:theme-surface-alt"}`}
                   >
                     {c.title}
                   </button>
@@ -155,7 +151,7 @@ export default function Assistant() {
               <p className="text-sm theme-text-muted">No messages yet. Ask a question.</p>
             )}
             {messages.map((m) => (
-              <div key={m.id} className={`message-bubble max-w-[80%] rounded-xl px-4 py-3 text-sm ${m.role === "user" ? "ml-auto bg-indigo-600 text-white" : "theme-surface-alt theme-text"}`}>
+              <div key={m.id} className={`message-bubble max-w-[80%] rounded-xl px-4 py-3 text-sm ${m.role === "user" ? "ml-auto theme-message-user" : "mr-auto theme-message-assistant"}`}>
                 <p className="whitespace-pre-wrap">{m.content}</p>
                 {m.role === "assistant" && m.sources?.length > 0 && (
                   <div className="mt-2 border-t theme-border pt-2 text-xs theme-text-muted">
@@ -175,8 +171,9 @@ export default function Assistant() {
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="border-t theme-border p-4">
+          <div className="theme-composer p-3">
             <div className="flex gap-2">
+              <MicrophoneButton onTranscript={handleTranscript} disabled={!selectedDocId || loading} />
               <input
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
@@ -187,13 +184,22 @@ export default function Assistant() {
                   }
                 }}
                 placeholder="Ask a question about this document..."
-                className="flex-1 rounded-lg border theme-border theme-surface-alt px-3 py-2 text-sm theme-text focus:border-indigo-500 focus:outline-none"
+                className="flex-1 rounded-lg border theme-border theme-composer-input px-3 py-2 text-sm theme-text focus:border-theme-primary focus:outline-none"
                 disabled={!selectedDocId || loading}
               />
               <button
+                type="button"
+                onClick={() => setQuestion("")}
+                disabled={!question.trim()}
+                className="rounded-lg border theme-border theme-surface-alt px-2 py-2 text-sm theme-text-muted hover:theme-surface disabled:opacity-60 transition"
+                title="Clear"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+              <button
                 onClick={handleSend}
                 disabled={!selectedDocId || loading || !question.trim()}
-                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-lg theme-primary px-4 py-2 text-sm font-medium text-white hover:theme-primary-hover disabled:opacity-60"
               >
                 <Send className="h-4 w-4" />
                 Send

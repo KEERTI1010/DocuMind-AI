@@ -88,7 +88,7 @@ export default function Dashboard() {
 
       <FadeIn delay={0.1}>
         <section
-          className={`rounded-2xl border-2 border-dashed p-8 text-center transition theme-shadow ${dragging ? "border-indigo-400 theme-primary-soft" : "border-indigo-200 dark:border-indigo-900 theme-surface"}`}
+          className={`rounded-2xl border-2 border-dashed p-8 text-center transition theme-shadow ${dragging ? "border-primary theme-primary-soft" : "border-theme-border theme-surface"}`}
           onDragOver={(e) => {
             e.preventDefault();
             setDragging(true);
@@ -96,13 +96,13 @@ export default function Dashboard() {
           onDragLeave={() => setDragging(false)}
           onDrop={onDrop}
         >
-          <Upload className="mx-auto h-10 w-10 text-indigo-500" />
+          <Upload className="mx-auto h-10 w-10 theme-primary-text" />
           <p className="mt-3 font-medium theme-text">Drag and drop a PDF here</p>
           <p className="text-sm theme-text-muted">or click to browse. Max 10 MB.</p>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition"
+            className="mt-4 rounded-lg theme-primary px-4 py-2 text-sm font-medium text-white hover:theme-primary-hover transition"
           >
             Select PDF
           </button>
@@ -120,12 +120,12 @@ export default function Dashboard() {
           {loading && (
             <div className="mt-4">
               <div className="h-2 w-full rounded-full theme-surface-alt">
-                <div className="progress-bar h-2 rounded-full bg-indigo-600" style={{ width: `${progress}%` }} />
+                <div className="progress-bar h-2 rounded-full bg-theme-primary" style={{ width: `${progress}%` }} />
               </div>
               <p className="mt-2 text-sm theme-text-muted">Uploading... {progress}%</p>
             </div>
           )}
-          {message && <p className="mt-3 text-sm text-green-500">{message}</p>}
+          {message && <p className="mt-3 text-sm theme-success">{message}</p>}
           {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
         </section>
       </FadeIn>
@@ -143,7 +143,7 @@ export default function Dashboard() {
               className="rounded-xl border theme-border theme-surface p-4 theme-shadow hover:theme-shadow-lg hover:-translate-y-1 transition"
             >
               <div className="flex items-center gap-3">
-                <FileText className="h-5 w-5 text-indigo-500" />
+                <FileText className="h-5 w-5 theme-primary-text" />
                 <div>
                   <p className="font-medium theme-text">{doc.name}</p>
                   <p className="text-xs theme-text-muted">

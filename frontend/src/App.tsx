@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { User } from "lucide-react";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LandingPage from "./pages/LandingPage";
 import Documents from "./pages/Documents";
@@ -11,8 +12,11 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import logoIcon from "./assets/logo-icon.svg";
+import { getAvatarUrl } from "./assets/avatars/manifest";
 
 function WorkspaceLayout() {
+  const { user } = useAuth();
   const navItems = [
     { to: "/documents", label: "My Documents" },
     { to: "/assistant", label: "AI Assistant" },
@@ -22,21 +26,21 @@ function WorkspaceLayout() {
 
   return (
     <div className="flex min-h-screen theme-bg theme-text">
-      <aside className="w-64 shrink-0 border-r theme-border theme-surface">
-        <div className="flex h-16 items-center gap-2 px-6 font-semibold theme-text">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">D</span>
-          DocuMind AI
+      <aside className="w-64 shrink-0 border-r theme-border theme-surface flex flex-col">
+        <div className="flex h-16 items-center gap-2 px-6 font-semibold theme-text shrink-0">
+          <img src={logoIcon} alt="DocuMind AI logo" className="h-7 w-7" />
+          <span>DocuMind AI</span>
         </div>
-        <nav className="space-y-1 px-3 py-4">
+        <nav className="space-y-1 px-3 py-4 flex-1">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `block rounded-lg px-3 py-2 text-sm font-medium transition ${
+                `block rounded-xl px-3 py-2 text-sm font-medium transition ${
                   isActive
-                    ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300"
-                    : "theme-text-muted hover:theme-surface-alt"
+                    ? "theme-nav-selected shadow-sm"
+                    : "theme-text hover:theme-accent-soft"
                 }`
               }
             >
@@ -44,6 +48,27 @@ function WorkspaceLayout() {
             </NavLink>
           ))}
         </nav>
+        {user && (
+          <div className="px-4 pb-6 pt-4 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full overflow-hidden border border-theme-border bg-theme-surface-alt">
+                {user.avatarUrl ? (
+                  <img src={getAvatarUrl(user.avatarUrl)} alt="Avatar" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center bg-theme-accent-soft">
+                    <User className="h-5 w-5 theme-primary-text" />
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium theme-text truncate">
+                  {user.displayName || "User"}
+                </p>
+                <p className="text-xs theme-text-muted truncate">{user.email}</p>
+              </div>
+            </div>
+          </div>
+        )}
       </aside>
       <main className="flex-1 p-6">
         <Routes>

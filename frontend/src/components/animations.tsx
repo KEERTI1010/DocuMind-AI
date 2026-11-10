@@ -36,37 +36,3 @@ export function ScrollReveal({ children, delay = 0 }: { children: ReactNode; del
 
   return <div ref={ref}>{children}</div>;
 }
-
-export function Floating({ children, duration = 4 }: { children: ReactNode; duration?: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-    gsap.to(ref.current, {
-      y: -14,
-      duration,
-      repeat: -1,
-      yoyo: true,
-      ease: "sine.inOut",
-    });
-  }, [duration]);
-
-  return <div ref={ref}>{children}</div>;
-}
-
-export function FloatSlow({ children }: { children: ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-    gsap.to(ref.current, {
-      y: -22,
-      duration: 5,
-      repeat: -1,
-      yoyo: true,
-      ease: "sine.inOut",
-    });
-  }, []);
-
-  return <div ref={ref}>{children}</div>;
-}

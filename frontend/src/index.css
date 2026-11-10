@@ -4,25 +4,42 @@
 
 @layer base {
   :root {
-    --bg: #fafbff;
+    --bg: #FFF9F5;
     --surface: #ffffff;
-    --surface-alt: #f5f4ff;
-    --border: #ece9ff;
-    --border-strong: #d9d6ff;
-    --text: #1a1440;
-    --text-muted: #6b6490;
-    --text-faint: #a49ec2;
-    --primary: #6d5efc;
-    --primary-hover: #5a49e0;
-    --primary-soft: #eef0ff;
-    --accent: #9b8cff;
-    --accent-soft: #f3f0ff;
+    --surface-alt: #fef3f7;
+    --border: #e8dcf5;
+    --border-strong: #d8c3e8;
+    --text: #25233A;
+    --text-muted: #68677D;
+    --text-faint: #b8b4c8;
+    --primary: #7967F5;
+    --primary-hover: #6a56d9;
+    --primary-soft: #f0e7ff;
+    --primary-soft-strong: #e8dcf5;
+    --accent: #7967F5;
+    --accent-soft: #f0e7ff;
+    --accent-pink: #FF9DB5;
+    --accent-pink-text: #FF9DB5;
+    --accent-pink-soft: #fff0f4;
+    --accent-pink-border: #ffcfda;
+    --accent-mint: #79D8C3;
+    --accent-mint-text: #79D8C3;
+    --accent-mint-soft: #e9f7f2;
+    --accent-mint-border: #b8e8d9;
+    --accent-peach: #FFD58A;
+    --accent-peach-text: #FFD58A;
+    --accent-peach-soft: #fff4e6;
+    --accent-peach-border: #ffdbae;
+    --accent-blue: #A9C9FF;
+    --accent-blue-text: #A9C9FF;
+    --accent-blue-soft: #eef4ff;
+    --accent-blue-border: #c7d9ff;
     --danger: #e03131;
     --danger-hover: #c22b2b;
     --success: #2f9e44;
-    --shadow-sm: 0 1px 2px rgba(45, 35, 100, 0.06);
-    --shadow: 0 4px 20px rgba(45, 35, 100, 0.08);
-    --shadow-lg: 0 12px 40px rgba(45, 35, 100, 0.14);
+    --shadow-sm: 0 1px 2px rgba(37, 35, 58, 0.06);
+    --shadow: 0 4px 20px rgba(37, 35, 58, 0.08);
+    --shadow-lg: 0 12px 40px rgba(37, 35, 58, 0.14);
     --radius: 16px;
   }
 }
@@ -36,13 +53,40 @@
   .theme-text-muted { color: var(--text-muted); }
   .theme-text-faint { color: var(--text-faint); }
   .theme-primary { background-color: var(--primary); }
+  .theme-primary-gradient { background-image: linear-gradient(to bottom right, var(--primary), var(--primary-hover)); }
   .theme-primary-text { color: var(--primary); }
   .theme-primary-hover:hover { background-color: var(--primary-hover); }
   .theme-primary-border { border-color: var(--primary); }
+  .theme-accent { background-color: var(--accent); }
+  .theme-accent-text { color: var(--accent); }
+  .theme-accent-soft { background-color: var(--accent-soft); }
+  .theme-accent-border { border-color: var(--accent); }
+  .theme-accent-pink { background-color: var(--accent-pink); }
+  .theme-accent-pink-text { color: var(--accent-pink-text); }
+  .theme-accent-pink-soft { background-color: var(--accent-pink-soft); }
+  .theme-accent-pink-border { border-color: var(--accent-pink-border); }
+  .theme-accent-mint { background-color: var(--accent-mint); }
+  .theme-accent-mint-text { color: var(--accent-mint-text); }
+  .theme-accent-mint-soft { background-color: var(--accent-mint-soft); }
+  .theme-accent-mint-border { border-color: var(--accent-mint-border); }
+  .theme-accent-peach { background-color: var(--accent-peach); }
+  .theme-accent-peach-text { color: var(--accent-peach-text); }
+  .theme-accent-peach-soft { background-color: var(--accent-peach-soft); }
+  .theme-accent-peach-border { border-color: var(--accent-peach-border); }
+  .theme-accent-blue { background-color: var(--accent-blue); }
+  .theme-accent-blue-text { color: var(--accent-blue-text); }
+  .theme-accent-blue-soft { background-color: var(--accent-blue-soft); }
+  .theme-accent-blue-border { border-color: var(--accent-blue-border); }
+  .theme-nav-selected { background-color: var(--primary-soft-strong); color: var(--primary); }
+  .theme-message-user { background-color: var(--primary); color: #ffffff; }
+  .theme-message-assistant { background-color: var(--surface-alt); color: var(--text); }
+  .theme-composer { background-color: var(--surface); border-top: var(--border); }
+  .theme-composer-input { background-color: var(--surface-alt); border-color: var(--border); }
   .theme-danger { background-color: var(--danger); }
   .theme-success { color: var(--success); }
   .theme-shadow { box-shadow: var(--shadow); }
   .theme-shadow-lg { box-shadow: var(--shadow-lg); }
+  .theme-shadow-sm { box-shadow: var(--shadow-sm); }
 }
 
 html, body {

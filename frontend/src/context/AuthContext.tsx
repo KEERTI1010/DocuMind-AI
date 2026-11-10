@@ -13,7 +13,7 @@ interface UserProfile extends AuthUser {
 interface AuthContextValue {
   user: UserProfile | null;
   loading: boolean;
-  login: (token: string, u: AuthUser) => void;
+  login: (token: string, refreshToken: string, u: AuthUser) => void;
   logout: () => Promise<void>;
   updateProfile: (updates: { displayName?: string; avatarUrl?: string }) => Promise<void>;
 }
@@ -37,12 +37,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
-    if (token) {
+    const refreshToken = localStorage.getItem("refresh_token");
+    if (token && refreshToken) {
       api.defaults.headers.common.Authorization = `Bearer ${token}`;
-      fetchMe()
+      supabase.auth
+        .setSession({ access_token: token, refresh_token: refreshToken })
+        .then(() => fetchMe())
         .then((u) => setUser(loadUser(u)))
         .catch(() => {
           localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
           delete api.defaults.headers.common.Authorization;
         })
         .finally(() => setLoading(false));
@@ -51,9 +55,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const login = (token: string, u: AuthUser) => {
+  const login = (token: string, refreshToken: string, u: AuthUser) => {
     localStorage.setItem("access_token", token);
+    localStorage.setItem("refresh_token", refreshToken);
     api.defaults.headers.common.Authorization = `Bearer ${token}`;
+    supabase.auth.setSession({ access_token: token, refresh_token: refreshToken }).catch(() => {
+      // Session may be invalid; user will need to sign in again
+    });
     setUser(loadUser(u));
   };
 
@@ -63,7 +71,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (updates.displayName !== undefined) metadata.display_name = updates.displayName;
     if (updates.avatarUrl !== undefined) metadata.avatar_url = updates.avatarUrl;
     const { data, error } = await supabase.auth.updateUser({ data: metadata });
-    if (error) throw error;
+    if (error) {
+      if (error.message?.includes("session") || error.message?.includes("Auth session")) {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        delete api.defaults.headers.common.Authorization;
+        setUser(null);
+        navigate("/login");
+      }
+      throw error;
+    }
     if (data.user) {
       setUser((prev) => {
         if (!prev) return prev;
@@ -84,6 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // ignore
     }
     localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
     delete api.defaults.headers.common.Authorization;
     setUser(null);
     navigate("/");

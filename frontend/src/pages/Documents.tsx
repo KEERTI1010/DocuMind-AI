@@ -40,7 +40,7 @@ export default function Documents() {
     setError("");
     try {
       const url = await getDownloadUrl(doc.id);
-      window.location.href = url;
+      window.open(url, "_blank");
     } catch (err: any) {
       setError(err?.response?.data?.error || "Failed to open document.");
     } finally {
@@ -53,14 +53,19 @@ export default function Documents() {
     setError("");
     try {
       const url = await getDownloadUrl(doc.id);
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch document");
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
+      a.href = blobUrl;
       a.download = doc.name;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
     } catch (err: any) {
-      setError(err?.response?.data?.error || "Failed to download document.");
+      setError(err?.message || "Failed to download document.");
     } finally {
       setActionId("");
     }
@@ -88,7 +93,7 @@ export default function Documents() {
         {documents.map((doc) => (
           <div key={doc.id} className="doc-card rounded-xl border theme-border theme-surface p-4 theme-shadow hover:theme-shadow-lg hover:-translate-y-1 transition">
             <div className="flex items-center gap-3">
-              <FileText className="h-5 w-5 text-indigo-500" />
+              <FileText className="h-5 w-5 theme-primary-text" />
               <div>
                 <p className="font-medium theme-text">{doc.name}</p>
                 <p className="text-xs theme-text-muted">
@@ -109,7 +114,7 @@ export default function Documents() {
               <button
                 onClick={() => downloadDocument(doc)}
                 disabled={actionId === doc.id}
-                className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-2 py-1 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-60 transition"
+                className="inline-flex items-center gap-1 rounded-lg theme-primary px-2 py-1 text-xs font-medium text-white hover:theme-primary-hover disabled:opacity-60 transition"
               >
                 <Download className="h-3 w-3" />
                 Download
