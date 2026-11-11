@@ -1,26 +1,7 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, FileText } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { FadeIn } from "../components/animations";
-
-function PDFCard({ rotate, top, left, right }: { rotate: string; top: string; left?: string; right?: string }) {
-  return (
-    <div
-      className={`absolute hidden rounded-xl bg-white p-4 shadow-xl sm:block ${top} ${left} ${right} ${rotate}`}
-    >
-      <div className="flex items-center gap-2 border-b border-theme-border pb-2">
-        <div className="h-3 w-3 rounded-full bg-red-300" />
-        <div className="h-3 w-3 rounded-full bg-amber-300" />
-        <div className="h-3 w-3 rounded-full bg-green-300" />
-      </div>
-      <div className="mt-3 space-y-2">
-        <div className="h-2 w-3/4 rounded bg-theme-accent-soft" />
-        <div className="h-2 w-1/2 rounded bg-theme-surface-alt" />
-        <div className="mt-2 h-2 w-full rounded bg-theme-surface-alt" />
-        <div className="h-2 w-2/3 rounded bg-theme-surface-alt" />
-      </div>
-    </div>
-  );
-}
+import heroImage from "../assets/hero.png";
 
 export default function Hero() {
   return (
@@ -59,14 +40,12 @@ export default function Hero() {
             </div>
           </FadeIn>
 
-          <div className="relative h-[420px]">
-            <PDFCard rotate="-rotate-6" top="top-10" left="left-0" />
-            <PDFCard rotate="rotate-6" top="top-40" right="right-0" />
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-accent-pink shadow-xl">
-                <FileText className="h-10 w-10 text-white" />
-              </div>
-            </div>
+          <div className="relative flex items-center justify-center">
+            <img
+              src={heroImage}
+              alt="DocuMind AI hero illustration"
+              className="max-w-full h-auto rounded-2xl border theme-border shadow-lg block mx-auto"
+            />
           </div>
         </div>
       </div>
