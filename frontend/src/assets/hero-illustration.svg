@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" fill="none">
+  <defs>
+    <linearGradient id="gradLavender" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F0E7FF"/>
+      <stop offset="100%" stop-color="#E8DCF5"/>
+    </linearGradient>
+    <linearGradient id="gradLaptop" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7967F5"/>
+      <stop offset="100%" stop-color="#5A49E0"/>
+    </linearGradient>
+    <linearGradient id="gradScreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#25233A"/>
+      <stop offset="100%" stop-color="#1A182B"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Background decorative shapes -->
+  <circle cx="650" cy="100" r="120" fill="#FFF0F4" opacity="0.6"/>
+  <circle cx="150" cy="500" r="100" fill="#E9F7F2" opacity="0.6"/>
+  <circle cx="700" cy="450" r="90" fill="#FFF4E6" opacity="0.5"/>
+
+  <!-- Laptop base -->
+  <path d="M250 380 L550 380 L540 440 L260 440 Z" fill="#E8E8E8" filter="url(#shadow)"/>
+  <path d="M260 380 L540 380 L535 390 L265 390 Z" fill="#D8D8D8"/>
+
+  <!-- Laptop screen -->
+  <path d="M270 160 L530 160 L520 360 L280 360 Z" fill="#F5F5F5" filter="url(#shadow)"/>
+  <path d="M280 170 L520 170 L512 350 L288 350 Z" fill="url(#gradScreen)"/>
+
+  <!-- AI Robot on screen -->
+  <!-- Robot head -->
+  <circle cx="400" cy="230" r="34" fill="#FFFFFF"/>
+  <circle cx="400" cy="230" r="34" stroke="#7967F5" stroke-width="3"/>
+  <!-- Robot eyes -->
+  <circle cx="382" cy="224" r="6" fill="#25233A"/>
+  <circle cx="418" cy="224" r="6" fill="#25233A"/>
+  <!-- Robot mouth -->
+  <path d="M390 242 Q400 250 410 242" stroke="#7967F5" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- Robot antenna -->
+  <path d="M400 198 L400 180" stroke="#7967F5" stroke-width="3"/>
+  <circle cx="400" cy="176" r="5" fill="#FF9DB5"/>
+  <!-- Robot ears -->
+  <circle cx="366" cy="230" r="10" fill="#FFFFFF" stroke="#7967F5" stroke-width="2"/>
+  <circle cx="434" cy="230" r="10" fill="#FFFFFF" stroke="#7967F5" stroke-width="2"/>
+  <!-- Robot body -->
+  <rect x="376" y="262" width="48" height="52" rx="8" fill="#FFFFFF"/>
+  <rect x="376" y="262" width="48" height="52" rx="8" stroke="#7967F5" stroke-width="2"/>
+  <circle cx="400" cy="288" r="6" fill="#FF9DB5"/>
+
+  <!-- Sparkles around robot head -->
+  <path d="M400 194 L404 200 L400 206 L396 200 Z" fill="#FFD58A"/>
+  <path d="M430 236 L438 236 L444 236 L444 244 L438 244 L432 250 L438 250 L438 258 L430 258 L424 250 L430 250 L424 244 L430 244 Z" fill="#79D8C3"/>
+
+  <!-- Floating PDF document -->
+  <g transform="translate(580, 180) rotate(-15)">
+    <rect x="0" y="0" width="70" height="95" rx="6" fill="#FFFFFF" stroke="#FF6B6B" stroke-width="3" filter="url(#shadow)"/>
+    <rect x="10" y="10" width="50" height="8" rx="2" fill="#FF6B6B"/>
+    <rect x="10" y="22" width="30" height="6" rx="1" fill="#FF6B6B" opacity="0.7"/>
+    <rect x="10" y="32" width="40" height="6" rx="1" fill="#FF6B6B" opacity="0.5"/>
+    <rect x="10" y="42" width="35" height="6" rx="1" fill="#FF6B6B" opacity="0.4"/>
+    <rect x="10" y="52" width="45" height="6" rx="1" fill="#FF6B6B" opacity="0.6"/>
+    <rect x="10" y="62" width="35" height="6" rx="1" fill="#FF6B6B" opacity="0.5"/>
+  </g>
+
+  <!-- Floating DOC document (blue) -->
+  <g transform="translate(620, 320) rotate(10)">
+    <rect x="0" y="0" width="60" height="80" rx="6" fill="#FFFFFF" stroke="#A9C9FF" stroke-width="3" filter="url(#shadow)"/>
+    <rect x="10" y="10" width="40" height="8" rx="2" fill="#A9C9FF"/>
+    <rect x="10" y="22" width="25" height="6" rx="1" fill="#A9C9FF" opacity="0.7"/>
+    <rect x="10" y="32" width="35" height="6" rx="1" fill="#A9C9FF" opacity="0.5"/>
+    <rect x="10" y="42" width="30" height="6" rx="1" fill="#A9C9FF" opacity="0.4"/>
+  </g>
+
+  <!-- Floating PPT document (orange) -->
+  <g transform="translate(120, 280) rotate(-8)">
+    <rect x="0" y="0" width="65" height="85" rx="6" fill="#FFFFFF" stroke="#FFD58A" stroke-width="3" filter="url(#shadow)"/>
+    <rect x="10" y="10" width="45" height="8" rx="2" fill="#FFD58A"/>
+    <rect x="10" y="22" width="30" height="6" rx="1" fill="#FFD58A" opacity="0.7"/>
+    <rect x="10" y="32" width="40" height="6" rx="1" fill="#FFD58A" opacity="0.5"/>
+    <rect x="10" y="42" width="35" height="6" rx="1" fill="#FFD58A" opacity="0.4"/>
+  </g>
+
+  <!-- Books stack -->
+  <g transform="translate(100, 440)">
+    <rect x="0" y="0" width="70" height="20" rx="3" fill="#FF9DB5" filter="url(#shadow)"/>
+    <rect x="5" y="18" width="80" height="18" rx="3" fill="#79D8C3" filter="url(#shadow)"/>
+    <rect x="10" y="34" width="90" height="16" rx="3" fill="#FFD58A" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="70" height="4" rx="1" fill="#FF6B6B"/>
+    <rect x="5" y="18" width="80" height="4" rx="1" fill="#5A49E0"/>
+    <rect x="10" y="34" width="90" height="4" rx="1" fill="#A9C9FF"/>
+  </g>
+
+  <!-- Small plant -->
+  <g transform="translate(650, 460)">
+    <path d="M20 40 Q30 20 40 40" stroke="#79D8C3" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M10 45 Q20 25 30 45" stroke="#79D8C3" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M30 45 Q40 25 50 45" stroke="#79D8C3" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M30 40 L30 65" stroke="#5A49E0" stroke-width="6" stroke-linecap="round"/>
+    <ellipse cx="30" cy="68" rx="12" ry="4" fill="#5A49E0"/>
+  </g>
+
+  <!-- Magnifying glass -->
+  <g transform="translate(420, 430)">
+    <circle cx="30" cy="30" r="22" fill="none" stroke="#7967F5" stroke-width="4"/>
+    <path d="M30 30 L50 50" stroke="#7967F5" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="30" cy="30" r="8" fill="#FFF0F4"/>
+  </g>
+
+  <!-- Subtle sparkles -->
+  <path d="M180 220 L184 226 L180 232 L176 226 Z" fill="#FFD58A"/>
+  <path d="M620 380 L626 386 L620 392 L614 386 Z" fill="#FF9DB5"/>
+  <path d="M350 460 L356 466 L350 472 L344 466 Z" fill="#79D8C3"/>
+  <path d="M100 420 L104 426 L100 432 L96 426 Z" fill="#FFF0F4"/>
+  <path d="M700 280 L706 286 L700 292 L694 286 Z" fill="#FFD58A"/>
+  <path d="M200 340 L204 346 L200 352 L196 346 Z" fill="#7967F5" opacity="0.6"/>
+</svg>
