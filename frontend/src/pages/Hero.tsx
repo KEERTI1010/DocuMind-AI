@@ -1,16 +1,11 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { FadeIn } from "../components/animations";
-import heroImage from "../assets/hero.png";
+import heroImage from "../assets/hero-illustration.png";
 
 export default function Hero() {
   return (
     <section className="relative overflow-hidden pt-20">
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute left-1/2 top-0 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-theme-accent-blue-soft blur-3xl" />
-        <div className="absolute left-10 top-20 h-64 w-64 rounded-full bg-theme-accent-pink-soft blur-2xl" />
-      </div>
-
       <div className="mx-auto max-w-6xl px-6">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <FadeIn>
@@ -44,7 +39,7 @@ export default function Hero() {
             <img
               src={heroImage}
               alt="DocuMind AI hero illustration"
-              className="max-w-full h-auto rounded-2xl border theme-border shadow-lg block mx-auto"
+              className="max-w-full h-auto object-contain rounded-2xl border theme-border shadow-lg block mx-auto"
             />
           </div>
         </div>
