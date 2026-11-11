@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
-import { LogOut, Mail, Edit2 } from "lucide-react";
+import { LogOut, Edit2, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import AvatarPicker from "../components/AvatarPicker";
 import FadeIn from "../components/FadeIn";
@@ -122,15 +122,13 @@ export default function Settings() {
               {saveSuccess && <p className="mt-1 text-sm theme-success">{saveSuccess}</p>}
             </div>
 
-            <div className="flex items-center gap-3 pt-3 border-t theme-border">
-              <div className="flex items-center gap-2">
-                <Mail className="h-5 w-5 theme-text-muted" />
-                <div>
-                  <p className="text-sm font-medium theme-text">Email address</p>
-                  <p className="text-xs theme-text-muted">{user.email}</p>
-                </div>
+            <div className="flex items-start gap-2 pt-3 border-t theme-border">
+              <Lock className="h-4 w-4 theme-text-muted mt-0.5" />
+              <div>
+                <p className="text-xs font-medium theme-text-muted uppercase tracking-wider">Account email</p>
+                <p className="text-sm font-medium theme-text">{user.email}</p>
+                <p className="text-xs theme-text-muted mt-0.5">Used for signing in and account recovery.</p>
               </div>
-              <span className="text-xs font-medium theme-primary-text">Read-only</span>
             </div>
           </div>
         ) : (
