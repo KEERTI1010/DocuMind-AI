@@ -6,7 +6,7 @@ import HowItWorks from "../pages/HowItWorks";
 import About from "../pages/About";
 import CTA from "../pages/CTA";
 import Footer from "../components/Footer";
-import logoIcon from "../assets/logo-icon.svg";
+import logoFull from "../assets/logo-full.svg";
 
 export default function LandingPage() {
   return (
@@ -27,8 +27,7 @@ function LandingNavbar() {
     <header className="sticky top-0 z-40 border-b border-theme-border bg-theme-surface/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logoIcon} alt="DocuMind AI logo" className="h-7 w-7" />
-          <span className="font-semibold text-theme-text">DocuMind AI</span>
+          <img src={logoFull} alt="DocuMind AI logo" className="h-7 w-auto" />
         </Link>
         <nav className="hidden items-center gap-8 md:flex">
           <a href="#features" className="text-sm font-medium theme-text-muted transition hover:theme-primary-text">Features</a>

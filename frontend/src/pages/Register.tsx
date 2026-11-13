@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../services/auth";
 import PasswordField from "../components/PasswordField";
-import logoIcon from "../assets/logo-icon.svg";
+import logoFull from "../assets/logo-full.svg";
 
 export default function Register() {
   const [fullName, setFullName] = useState("");
@@ -47,8 +47,7 @@ export default function Register() {
     <div className="flex min-h-screen items-center justify-center bg-theme-bg px-4">
       <div className="w-full max-w-md rounded-2xl border theme-border bg-theme-surface p-8 theme-shadow-sm">
         <div className="flex items-center gap-2 mb-6">
-          <img src={logoIcon} alt="DocuMind AI logo" className="h-7 w-7" />
-          <span className="font-semibold text-theme-text">DocuMind AI</span>
+          <img src={logoFull} alt="DocuMind AI logo" className="h-7 w-auto" />
         </div>
         <h1 className="text-2xl font-bold theme-text">Create account</h1>
         <p className="mt-1 text-sm theme-text-muted">Join DocuMind AI</p>

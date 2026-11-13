@@ -35,11 +35,11 @@ export default function Hero() {
             </div>
           </FadeIn>
 
-          <div className="relative flex items-center justify-center">
+          <div className="relative flex items-center justify-center min-h-[400px] lg:min-h-[500px]">
             <img
               src={heroImage}
               alt="DocuMind AI hero illustration"
-              className="max-w-full h-auto object-contain rounded-2xl border theme-border shadow-lg block mx-auto"
+              className="max-w-full max-h-[450px] lg:max-h-[550px] w-auto h-auto object-contain rounded-2xl border theme-border shadow-xl block mx-auto"
             />
           </div>
         </div>
