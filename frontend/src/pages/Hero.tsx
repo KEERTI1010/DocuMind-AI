@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { FadeIn } from "../components/animations";
-import heroImage from "../assets/hero-illustration.svg";
+import heroImage from "../assets/Hero.png";
 
 export default function Hero() {
   return (

@@ -22,6 +22,11 @@ export async function loginUser(email: string, password: string) {
   return response.data;
 }
 
+export async function resendVerificationEmail(email: string) {
+  const response = await api.post("/api/auth/resend-verification", { email: email.trim() });
+  return response.data;
+}
+
 export async function fetchMe() {
   const response = await api.get("/api/auth/me");
   return response.data.user as AuthUser;

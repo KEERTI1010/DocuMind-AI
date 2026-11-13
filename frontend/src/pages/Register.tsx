@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../services/auth";
 import PasswordField from "../components/PasswordField";
-import logoFull from "../assets/logo-full.svg";
+import logoImg from "../assets/Logo.png";
 
 export default function Register() {
   const [fullName, setFullName] = useState("");
@@ -10,7 +10,6 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -30,11 +29,9 @@ export default function Register() {
     }
     setLoading(true);
     setError("");
-    setSuccess("");
     try {
       await registerUser(fullName, email, password);
-      setSuccess("Registration successful. Please log in.");
-      setTimeout(() => navigate("/login"), 1200);
+      navigate("/verify-success", { state: { email } });
     } catch (err: any) {
       const message = err?.response?.data?.error || err?.message || "Registration failed.";
       setError(message);
@@ -47,7 +44,7 @@ export default function Register() {
     <div className="flex min-h-screen items-center justify-center bg-theme-bg px-4">
       <div className="w-full max-w-md rounded-2xl border theme-border bg-theme-surface p-8 theme-shadow-sm">
         <div className="flex items-center gap-2 mb-6">
-          <img src={logoFull} alt="DocuMind AI logo" className="h-7 w-auto" />
+          <img src={logoImg} alt="DocuMind AI logo" className="h-7 w-auto" />
         </div>
         <h1 className="text-2xl font-bold theme-text">Create account</h1>
         <p className="mt-1 text-sm theme-text-muted">Join DocuMind AI</p>
@@ -63,7 +60,6 @@ export default function Register() {
           <PasswordField label="Password" value={password} onChange={setPassword} />
           <PasswordField label="Confirm Password" value={confirmPassword} onChange={setConfirmPassword} />
           {error && <p className="text-sm text-red-500">{error}</p>}
-          {success && <p className="text-sm theme-success">{success}</p>}
           <button type="submit" disabled={loading} className="w-full rounded-lg theme-primary py-2 font-medium text-white hover:theme-primary-hover disabled:opacity-60">{loading ? "Creating..." : "Create Account"}</button>
         </form>
         <p className="mt-4 text-center text-sm theme-text-muted">

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import logoIcon from "../assets/logo-icon.svg";
+import logoImg from "../assets/Logo.png";
 
 export default function Footer() {
   return (
@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <div className="flex items-center gap-2">
-              <img src={logoIcon} alt="DocuMind AI logo" className="h-7 w-7" />
+              <img src={logoImg} alt="DocuMind AI logo" className="h-7 w-auto" />
               <span className="font-semibold theme-text">DocuMind AI</span>
             </div>
             <p className="mt-3 text-sm theme-text-muted">AI-powered document understanding for students and professionals.</p>

@@ -12,7 +12,9 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import logoIcon from "./assets/logo-icon.svg";
+import EmailVerificationSuccess from "./pages/EmailVerificationSuccess";
+import EmailVerificationCallback from "./pages/EmailVerificationCallback";
+import logoImg from "./assets/Logo.png";
 import { getAvatarUrl } from "./assets/avatars/manifest";
 
 function WorkspaceLayout() {
@@ -28,7 +30,7 @@ function WorkspaceLayout() {
     <div className="flex min-h-screen theme-bg theme-text">
       <aside className="w-64 shrink-0 border-r theme-border theme-surface flex flex-col">
         <div className="flex h-16 items-center gap-2 px-6 font-semibold theme-text shrink-0">
-          <img src={logoIcon} alt="DocuMind AI logo" className="h-7 w-7" />
+          <img src={logoImg} alt="DocuMind AI logo" className="h-7 w-auto" />
           <span>DocuMind AI</span>
         </div>
         <nav className="space-y-1 px-3 py-4 flex-1">
@@ -91,6 +93,8 @@ export default function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/verify-success" element={<EmailVerificationSuccess />} />
+            <Route path="/verify-email" element={<EmailVerificationCallback />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/*" element={<WorkspaceLayout />} />

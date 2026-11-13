@@ -43,6 +43,36 @@ async function register(req, res) {
   }
 }
 
+async function resendVerification(req, res) {
+  const { email } = req.body || {};
+
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
+
+  if (!EMAIL_REGEX.test(email)) {
+    return res.status(400).json({ error: "Invalid email format" });
+  }
+
+  try {
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: {
+        emailRedirectTo: `${process.env.FRONTEND_URL || "http://localhost:5173"}/login`,
+      },
+    });
+
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    return res.json({ message: "Verification email sent. Please check your inbox." });
+  } catch (err) {
+    return res.status(500).json({ error: "Failed to send verification email" });
+  }
+}
+
 async function login(req, res) {
   const { email, password } = req.body || {};
 
@@ -92,4 +122,4 @@ async function logout(req, res) {
   }
 }
 
-module.exports = { register, login, me, logout };
+module.exports = { register, login, me, logout, resendVerification };
