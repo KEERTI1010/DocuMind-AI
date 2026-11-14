@@ -32,6 +32,7 @@ export default function MicrophoneButton({ onTranscript, disabled }: MicrophoneB
   const recRef = useRef<SpeechRecognitionCtor extends new () => any ? InstanceType<SpeechRecognitionCtor> : any>(null);
   const onTranscriptRef = useRef(onTranscript);
   const finalTextRef = useRef("");
+  const processedFinalIndexRef = useRef(-1);
 
   useEffect(() => {
     onTranscriptRef.current = onTranscript;
@@ -51,6 +52,7 @@ export default function MicrophoneButton({ onTranscript, disabled }: MicrophoneB
       onTranscriptRef.current(finalTextRef.current);
     }
     finalTextRef.current = "";
+    processedFinalIndexRef.current = -1;
     setRecording(false);
   };
 
@@ -79,20 +81,31 @@ export default function MicrophoneButton({ onTranscript, disabled }: MicrophoneB
     rec.interimResults = true;
     rec.onstart = () => {
       finalTextRef.current = "";
+      processedFinalIndexRef.current = -1;
       setRecording(true);
     };
     rec.onresult = (e: any) => {
       let interim = "";
-      let final = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const transcript = e.results[i][0].transcript;
-        if (e.results[i].isFinal) final += transcript;
-        else interim += transcript;
+      let newFinal = "";
+      const results = e.results;
+      const startIdx = processedFinalIndexRef.current + 1;
+
+      for (let i = startIdx; i < results.length; i++) {
+        const transcript = results[i][0].transcript;
+        if (results[i].isFinal) {
+          newFinal += (newFinal ? " " : "") + transcript;
+          processedFinalIndexRef.current = i;
+        } else {
+          interim += (interim ? " " : "") + transcript;
+        }
       }
-      if (final) {
-        finalTextRef.current = (finalTextRef.current + final).replace(/\s+/g, " ").trim();
+
+      if (newFinal) {
+        finalTextRef.current = (finalTextRef.current + (finalTextRef.current ? " " : "") + newFinal).replace(/\s+/g, " ").trim();
       }
-      onTranscriptRef.current(finalTextRef.current + (interim ? ` ${interim}` : ""));
+
+      const displayText = finalTextRef.current + (interim ? ` ${interim}` : "");
+      onTranscriptRef.current(displayText);
     };
     rec.onerror = (e: any) => {
       const msg = e?.error;
