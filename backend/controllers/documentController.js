@@ -3,6 +3,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { supabaseAdmin } = require("../config/supabase");
 const { createUserSupabaseClient } = require("../config/userSupabase");
 const { extractTextWithGemini } = require("../services/ocrService");
+const { enhancePagesWithVisualExtraction } = require("../services/visualExtraction");
 
 const PDF_SIGNATURE = Buffer.from([0x25, 0x50, 0x44, 0x46, 0x2d]); // %PDF-
 
@@ -59,6 +60,18 @@ async function uploadDocument(req, res) {
       const userSupabase = createUserSupabaseClient(req.accessToken);
       await userSupabase.storage.from("documents").remove([storagePath]);
       return res.status(422).json({ error: "Failed to extract text from PDF" });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (apiKey && pages.length > 0) {
+      try {
+        console.log(`[upload] Before visual extraction: ${pages.length} pages, extractedText length: ${extractedText.length}`);
+        pages = await enhancePagesWithVisualExtraction(file.buffer, pages, apiKey);
+        extractedText = pages.map((p) => p.text || "").join("\n");
+        console.log(`[upload] After visual extraction: extractedText length: ${extractedText.length}`);
+      } catch (err) {
+        console.error("[upload] Visual extraction failed, continuing with text-only:", err.message, err.stack);
+      }
     }
 
     if (!extractedText.trim()) {
@@ -264,4 +277,135 @@ async function getSignedUrl(req, res) {
   }
 }
 
-module.exports = { uploadDocument, listDocuments, askDocument, getSignedUrl };
+async function reprocessDocument(req, res) {
+  const user = req.user;
+  const { documentId } = req.params;
+
+  try {
+    console.log(`[reprocess] Starting reprocessing for document ${documentId} by user ${user.id}`);
+
+    const { data: document, error: docError } = await supabaseAdmin
+      .from("documents")
+      .select("id, storage_path, user_id, name")
+      .eq("id", documentId)
+      .eq("user_id", user.id)
+      .single();
+
+    if (docError || !document) {
+      console.warn(`[reprocess] Document not found: ${documentId} for user ${user.id}`);
+      return res.status(404).json({ error: "Document not found" });
+    }
+
+    const userSupabase = createUserSupabaseClient(req.accessToken);
+    console.log(`[reprocess] Downloading PDF from storage: ${document.storage_path}`);
+
+    const { data: fileData, error: downloadError } = await userSupabase.storage
+      .from("documents")
+      .download(document.storage_path);
+
+    if (downloadError || !fileData) {
+      console.error(`[reprocess] Failed to download PDF:`, downloadError);
+      return res.status(500).json({ error: "Failed to download PDF from storage" });
+    }
+
+    const arrayBuffer = await fileData.arrayBuffer();
+    const pdfBuffer = Buffer.from(arrayBuffer);
+
+    let pages = [];
+    try {
+      const parser = new PDFParse({ data: new Uint8Array(pdfBuffer) });
+      const result = await parser.getText();
+      pages = result.pages || [];
+      await parser.destroy();
+      console.log(`[reprocess] PDF parsed: ${pages.length} pages extracted`);
+    } catch (err) {
+      console.error(`[reprocess] PDF parsing failed:`, err.message, err.stack);
+      return res.status(422).json({ error: "Failed to parse PDF for reprocessing" });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (apiKey && pages.length > 0) {
+      try {
+        console.log(`[reprocess] Running visual extraction on ${pages.length} pages...`);
+        pages = await enhancePagesWithVisualExtraction(pdfBuffer, pages, apiKey);
+        console.log(`[reprocess] Visual extraction completed`);
+      } catch (err) {
+        console.error(`[reprocess] Visual extraction failed:`, err.message, err.stack);
+      }
+    }
+
+    const chunks = [];
+    if (pages.length > 0) {
+      pages.forEach((page, pageIndex) => {
+        const pageChunks = chunkText(page.text || "");
+        pageChunks.forEach((chunk, chunkIndex) => {
+          chunks.push({
+            document_id: documentId,
+            chunk_index: chunks.length,
+            page_number: pageIndex + 1,
+            content: chunk,
+          });
+        });
+      });
+    } else {
+      const extractedText = pages.map((p) => p.text || "").join("\n");
+      chunkText(extractedText).forEach((chunk, index) => {
+        chunks.push({
+          document_id: documentId,
+          chunk_index: index,
+          page_number: null,
+          content: chunk,
+        });
+      });
+    }
+
+    console.log(`[reprocess] Generated ${chunks.length} new chunks`);
+
+    if (chunks.length === 0) {
+      console.warn(`[reprocess] No chunks generated, keeping existing chunks`);
+      return res.status(422).json({ error: "No text could be extracted from PDF" });
+    }
+
+    const chunksJson = chunks.map(c => ({
+      chunk_index: c.chunk_index,
+      page_number: c.page_number,
+      content: c.content,
+    }));
+
+    console.log(`[reprocess] Calling atomic replace_document_chunks RPC...`);
+    const { error: rpcError } = await supabaseAdmin.rpc('replace_document_chunks', {
+      p_document_id: documentId,
+      p_chunks: chunksJson,
+    });
+
+    if (rpcError) {
+      console.error(`[reprocess] RPC failed:`, rpcError.message, rpcError.details, rpcError.hint);
+      return res.status(500).json({ error: "Failed to replace document chunks" });
+    }
+
+    console.log(`[reprocess] Atomic chunk replacement successful via RPC`);
+
+    const { error: statusError } = await supabaseAdmin
+      .from("documents")
+      .update({ status: "processed" })
+      .eq("id", documentId);
+
+    if (statusError) {
+      console.error(`[reprocess] Failed to update document status:`, statusError.message);
+    } else {
+      console.log(`[reprocess] Document status updated to 'processed'`);
+    }
+
+    console.log(`[reprocess] Reprocessing completed successfully for document ${documentId}`);
+    return res.json({
+      message: "Document reprocessed successfully",
+      documentId,
+      chunkCount: chunks.length,
+    });
+  } catch (err) {
+    console.error(`[reprocess] Unexpected error:`, err.message, err.stack);
+    return res.status(500).json({ error: "Reprocessing failed" });
+  }
+}
+
+module.exports = { uploadDocument, listDocuments, askDocument, getSignedUrl, reprocessDocument };

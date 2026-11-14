@@ -1,7 +1,7 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { supabaseAdmin } = require("../config/supabase");
 
-const STOP_WORDS = new Set(["the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "by", "is", "are", "was", "were", "be", "been", "this", "that", "it", "as", "from"]);
+const STOP_WORDS = new Set(["the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "by", "is", "are", "was", "were", "be", "been", "this", "that", "it", "as", "from", "what", "how", "when", "where", "which", "who", "why", "can", "could", "would", "should", "will", "do", "does", "did", "have", "has", "had", "am"]);
 
 const COMMON_CORRECTIONS = {
   "binry": "binary",
@@ -272,19 +272,62 @@ function correctQuery(question, chunks) {
 
 function retrieveChunks(question, chunks, limit = 5) {
   const questionTerms = new Set(tokenize(question));
+  console.log(`[rag] Question terms: ${Array.from(questionTerms).join(", ")}`);
   const scored = chunks.map((chunk) => {
     const chunkTerms = tokenize(chunk.content);
     let score = 0;
     questionTerms.forEach((term) => {
       if (chunkTerms.includes(term)) score += 1;
     });
+    if (score > 0) {
+      console.log(`[rag] Chunk ${chunk.chunk_index} (page ${chunk.page_number}): score=${score}, terms=${Array.from(chunkTerms).filter(t => questionTerms.has(t)).join(", ")}, preview="${chunk.content.slice(0, 100)}"`);
+    }
     return { chunk, score };
   });
 
   scored.sort((a, b) => b.score - a.score);
   const relevant = scored.filter((item) => item.score > 0).slice(0, limit);
   const selected = relevant.length ? relevant : scored.slice(0, Math.min(limit, scored.length));
+  console.log(`[rag] Selected ${selected.length} chunks: ${selected.map(s => `chunk ${s.chunk.chunk_index} (page ${s.chunk.page_number}, score ${s.score})`).join(", ")}`);
   return selected.map((item) => item.chunk);
+}
+
+async function callGeminiWithRetry(model, prompt, timeoutMs, maxRetries = 3) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const attemptStart = Date.now();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const result = await model.generateContent(prompt, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      console.log(`[rag:timing] Attempt ${attempt + 1} succeeded in ${Date.now() - attemptStart}ms`);
+      return result;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      const attemptDuration = Date.now() - attemptStart;
+      const status = err?.status || err?.response?.status;
+      const isAborted = err?.name === "AbortError" || err?.message?.includes("abort");
+      const isRateLimit = status === 429;
+      const isServerError = status >= 500 && status < 600;
+      const isNetworkError = err?.code === "ECONNRESET" || err?.code === "ENOTFOUND" || err?.code === "ETIMEDOUT";
+
+      const isTransient = isAborted || isRateLimit || isServerError || isNetworkError;
+
+      const errMsg = isAborted ? "GEMINI_TIMEOUT" : err.message;
+      console.warn(`[rag:timing] Attempt ${attempt + 1} failed after ${attemptDuration}ms:`, errMsg, `status=${status || "unknown"}, aborted=${isAborted}, transient=${isTransient}`);
+
+      if (attempt === maxRetries || !isTransient) {
+        const enrichedError = new Error(errMsg);
+        enrichedError.status = status;
+        enrichedError.code = err?.code;
+        throw enrichedError;
+      }
+
+      const delay = Math.min(1000 * 2 ** attempt, 5000) + Math.random() * 500;
+      console.warn(`[rag] Gemini error (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${Math.round(delay)}ms:`, errMsg, `status=${status || "unknown"}`);
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
 }
 
 async function generateAnswer(documentId, question) {
@@ -315,11 +358,18 @@ async function generateAnswer(documentId, question) {
   const correction = correctQuery(question, chunks);
   const retrievalQuery = correction.corrected ? correction.correctedQuery : question;
 
+  const retrievalStart = Date.now();
   const selected = retrieveChunks(retrievalQuery, chunks, 5);
+  console.log(`[rag:timing] Retrieval took ${Date.now() - retrievalStart}ms, selected ${selected.length} chunks`);
 
+  const contextBuildStart = Date.now();
   const context = selected
     .map((chunk, index) => `Chunk ${index + 1} (page ${chunk.page_number ?? "unknown"}, index ${chunk.chunk_index}):\n${chunk.content}`)
     .join("\n\n");
+  console.log(`[rag:timing] Context build took ${Date.now() - contextBuildStart}ms, length=${context.length}`);
+
+  console.log("[rag] Context sent to Gemini:", context.slice(0, 2000));
+  console.log("[rag] Full context length:", context.length);
 
   console.log("RAG: generating answer", { documentId, originalQuery: question, correctedQuery: retrievalQuery, wasCorrected: correction.corrected });
 
@@ -338,12 +388,19 @@ ${context}
 
 Question: ${question}`;
 
-  const geminiPromise = model.generateContent(prompt);
-  const timeoutPromise = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error("GEMINI_TIMEOUT")), 30000)
-  );
-  const result = await Promise.race([geminiPromise, timeoutPromise]);
-  console.log("RAG: Gemini response received");
+  console.log(`[rag:timing] Prompt length: ${prompt.length} chars, estimated tokens: ~${Math.ceil(prompt.length / 4)}`);
+  console.log(`[rag:timing] Starting Gemini request...`);
+  const totalStart = Date.now();
+  const timeoutMs = parseInt(process.env.GEMINI_TIMEOUT_MS, 10) || 90000;
+  let result;
+  try {
+    result = await callGeminiWithRetry(model, prompt, timeoutMs);
+  } catch (err) {
+    console.error("[rag] Gemini call failed:", err.message, err.status || "", err.stack);
+    throw err;
+  }
+  const geminiDuration = Date.now() - totalStart;
+  console.log(`[rag:timing] Gemini response received after ${geminiDuration}ms`);
   const answer = result.response.text() || "The document does not contain enough information.";
 
   const sources = selected.map((chunk) => ({

@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { FileText, RefreshCw, Download, Eye } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { FileText, RefreshCw, Download, Eye, Upload } from "lucide-react";
 import { gsap } from "gsap";
-import { fetchDocuments, getDownloadUrl, type DocumentItem } from "../services/documents";
+import { fetchDocuments, getDownloadUrl, uploadDocument, type DocumentItem } from "../services/documents";
 import FadeIn from "../components/FadeIn";
 
 export default function Documents() {
@@ -9,6 +9,9 @@ export default function Documents() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [actionId, setActionId] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
     setLoading(true);
@@ -20,6 +23,47 @@ export default function Documents() {
       setError(err?.response?.data?.error || "Failed to load documents.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpload = async (file: File) => {
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+      setError("Only PDF files are allowed.");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setError("File size must be less than 10 MB.");
+      return;
+    }
+
+    setUploading(true);
+    setUploadProgress(0);
+    setError("");
+
+    try {
+      await uploadDocument(file, setUploadProgress);
+      setUploadProgress(100);
+      await load();
+    } catch (err: any) {
+      setError(err?.response?.data?.error || "Upload failed.");
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const triggerFilePicker = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleUpload(file);
     }
   };
 
@@ -76,12 +120,42 @@ export default function Documents() {
       <FadeIn>
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold theme-text">My Documents</h1>
-          <button onClick={load} className="inline-flex items-center gap-2 rounded-lg border theme-border theme-surface px-3 py-2 text-sm font-medium theme-text hover:theme-surface-alt transition">
-            <RefreshCw className="h-4 w-4" />
-            Refresh
-          </button>
+          <div className="flex items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/pdf"
+              onChange={handleFileChange}
+              className="hidden"
+              disabled={uploading}
+            />
+            <button
+              onClick={triggerFilePicker}
+              disabled={uploading}
+              className="inline-flex items-center gap-2 rounded-lg theme-primary px-3 py-2 text-sm font-medium text-white hover:theme-primary-hover disabled:opacity-60 transition"
+            >
+              <Upload className="h-4 w-4" />
+              Upload PDF
+            </button>
+            <button onClick={load} className="inline-flex items-center gap-2 rounded-lg border theme-border theme-surface px-3 py-2 text-sm font-medium theme-text hover:theme-surface-alt transition">
+              <RefreshCw className="h-4 w-4" />
+              Refresh
+            </button>
+          </div>
         </div>
       </FadeIn>
+
+      {uploading && (
+        <div className="mt-4 flex items-center gap-3">
+          <div className="flex-1 h-2 rounded-full bg-theme-border overflow-hidden">
+            <div
+              className="h-full bg-theme-primary transition-all duration-300"
+              style={{ width: `${uploadProgress}%` }}
+            />
+          </div>
+          <span className="text-sm theme-text-muted w-12 text-right">{uploadProgress}%</span>
+        </div>
+      )}
 
       {loading && <p className="mt-6 text-sm theme-text-muted">Loading documents...</p>}
       {error && <p className="mt-6 text-sm text-red-500">{error}</p>}
