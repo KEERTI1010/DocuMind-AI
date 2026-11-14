@@ -4,24 +4,106 @@ import { Copy, Share2, ThumbsUp, ThumbsDown, RotateCcw, Check } from "lucide-rea
 import { useState, useCallback } from "react";
 
 function markdownToPlainText(markdown: string): string {
-  let text = markdown;
+  const lines = markdown.split(/\r?\n/);
+  const output: string[] = [];
+  let inCodeBlock = false;
+  let codeBlockContent: string[] = [];
 
-  text = text
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+
+    if (line.startsWith("```")) {
+      if (!inCodeBlock) {
+        inCodeBlock = true;
+        codeBlockContent = [];
+      } else {
+        inCodeBlock = false;
+        if (codeBlockContent.length > 0) {
+          output.push("");
+          output.push(...codeBlockContent);
+          output.push("");
+        }
+      }
+      continue;
+    }
+
+    if (inCodeBlock) {
+      codeBlockContent.push(line);
+      continue;
+    }
+
+    const trimmed = line.trim();
+
+    if (trimmed === "") {
+      if (output.length > 0 && output[output.length - 1] !== "") {
+        output.push("");
+      }
+      continue;
+    }
+
+    const headingMatch = trimmed.match(/^(#{1,6})\s+(.*)$/);
+    if (headingMatch) {
+      const level = headingMatch[1].length;
+      const headingText = headingMatch[2].replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*(.+?)\*/g, "$1");
+      if (output.length > 0 && output[output.length - 1] !== "") {
+        output.push("");
+      }
+      output.push(headingText);
+      if (level <= 2) output.push("");
+      continue;
+    }
+
+    const bulletMatch = trimmed.match(/^[\s]*[-*+]\s+(.*)$/);
+    if (bulletMatch) {
+      let bulletText = bulletMatch[1];
+      bulletText = convertInlineMarkdown(bulletText);
+      output.push("• " + bulletText);
+      continue;
+    }
+
+    const numberedMatch = trimmed.match(/^[\s]*(\d+)\.\s+(.*)$/);
+    if (numberedMatch) {
+      let numText = numberedMatch[2];
+      numText = convertInlineMarkdown(numText);
+      output.push(numberedMatch[1] + ". " + numText);
+      continue;
+    }
+
+    const blockquoteMatch = trimmed.match(/^>\s+(.*)$/);
+    if (blockquoteMatch) {
+      let quoteText = blockquoteMatch[1];
+      quoteText = convertInlineMarkdown(quoteText);
+      output.push("> " + quoteText);
+      continue;
+    }
+
+    let processedLine = convertInlineMarkdown(line);
+    if (output.length > 0 && output[output.length - 1] !== "") {
+      output.push(processedLine);
+    } else {
+      output.push(processedLine);
+    }
+  }
+
+  let result = output.join("\n");
+  result = result.replace(/\n{3,}/g, "\n\n");
+  return result.trim();
+}
+
+function convertInlineMarkdown(text: string): string {
+  let result = text;
+
+  result = result
     .replace(/\*\*([^*]+)\*\*/g, "$1")
     .replace(/__([^_]+)__/g, "$1")
     .replace(/\*([^*]+)\*/g, "$1")
     .replace(/_([^_]+)_/g, "$1")
     .replace(/`([^`]+)`/g, "$1")
-    .replace(/```[\s\S]*?```/g, (match) => match.replace(/```/g, "").trim())
-    .replace(/^#{1,6}\s+/gm, "")
-    .replace(/^>\s+/gm, "")
-    .replace(/^\s*[-*+]\s+/gm, "• ")
-    .replace(/^\s*\d+\.\s+/gm, (m) => m.trim() + " ")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
     .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1");
 
-  text = text
-    .replace(/\$\$([\s\S]+?)\$\$/g, (_, math) => `\n${math.trim()}\n`)
+  result = result
+    .replace(/\$\$([\s\S]+?)\$\$/g, (_, math) => math.trim())
     .replace(/\$([^$\n]+)\$/g, (_, math) => math.trim());
 
   const latexMap: Record<string, string> = {
@@ -85,12 +167,13 @@ function markdownToPlainText(markdown: string): string {
   };
 
   for (const [latex, unicode] of Object.entries(latexMap)) {
-    text = text.replace(new RegExp(latex.replace(/\\/g, "\\\\"), "g"), unicode);
+    result = result.replace(new RegExp(latex.replace(/\\/g, "\\\\"), "g"), unicode);
   }
 
-  text = text.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, "($1)/($2)");
-  text = text.replace(/\\sqrt\{([^}]+)\}/g, "√($1)");
-  text = text.replace(/\^\{?([^}]+)\}?/g, (_, sup) => {
+  result = result.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, "($1)/($2)");
+  result = result.replace(/\\sqrt\{([^}]+)\}/g, "√($1)");
+
+  result = result.replace(/\^\{?([^}]+)\}?/g, (_, sup) => {
     const supMap: Record<string, string> = {
       "2": "²", "3": "³", "1": "¹", "0": "⁰",
       "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹",
@@ -99,7 +182,8 @@ function markdownToPlainText(markdown: string): string {
     };
     return sup.split("").map((c: string) => supMap[c] || c).join("");
   });
-  text = text.replace(/_\{?([^}]+)\}?/g, (_, sub) => {
+
+  result = result.replace(/_\{?([^}]+)\}?/g, (_, sub) => {
     const subMap: Record<string, string> = {
       "0": "₀", "1": "₁", "2": "₂", "3": "₃", "4": "₄",
       "5": "₅", "6": "₆", "7": "₇", "8": "₈", "9": "₉",
@@ -111,10 +195,10 @@ function markdownToPlainText(markdown: string): string {
     return sub.split("").map((c: string) => subMap[c] || c).join("");
   });
 
-  text = text.replace(/\\left|\\right|\\,|\\;|\\:|\\!|\\quad|\\qquad|\\,/g, "");
-  text = text.replace(/\s+/g, " ").trim();
+  result = result.replace(/\\left|\\right|\\,|\\;|\\:|\\!|\\quad|\\qquad|\\,/g, "");
+  result = result.replace(/[ \t]+/g, " ").trim();
 
-  return text;
+  return result;
 }
 
 interface MessageContentProps {

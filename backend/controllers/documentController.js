@@ -1,6 +1,7 @@
 const { PDFParse } = require("pdf-parse");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { supabaseAdmin } = require("../config/supabase");
+const { createUserSupabaseClient } = require("../config/userSupabase");
 const { extractTextWithGemini } = require("../services/ocrService");
 
 const PDF_SIGNATURE = Buffer.from([0x25, 0x50, 0x44, 0x46, 0x2d]); // %PDF-
@@ -33,7 +34,8 @@ async function uploadDocument(req, res) {
   const storagePath = `${user.id}/${Date.now()}-${file.originalname}`;
 
   try {
-    const { error: storageError } = await supabaseAdmin.storage
+    const userSupabase = createUserSupabaseClient(req.accessToken);
+    const { error: storageError } = await userSupabase.storage
       .from("documents")
       .upload(storagePath, file.buffer, {
         contentType: "application/pdf",
@@ -54,7 +56,8 @@ async function uploadDocument(req, res) {
       pages = result.pages || [];
       await parser.destroy();
     } catch (err) {
-      await supabaseAdmin.storage.from("documents").remove([storagePath]);
+      const userSupabase = createUserSupabaseClient(req.accessToken);
+      await userSupabase.storage.from("documents").remove([storagePath]);
       return res.status(422).json({ error: "Failed to extract text from PDF" });
     }
 
@@ -62,13 +65,15 @@ async function uploadDocument(req, res) {
       try {
         extractedText = await extractTextWithGemini(file.buffer);
       } catch (err) {
-        await supabaseAdmin.storage.from("documents").remove([storagePath]);
+        const userSupabase = createUserSupabaseClient(req.accessToken);
+        await userSupabase.storage.from("documents").remove([storagePath]);
         return res.status(422).json({ error: "Failed to extract text from PDF" });
       }
     }
 
     if (!extractedText.trim()) {
-      await supabaseAdmin.storage.from("documents").remove([storagePath]);
+      const userSupabase = createUserSupabaseClient(req.accessToken);
+      await userSupabase.storage.from("documents").remove([storagePath]);
       return res.status(422).json({ error: "No text could be extracted from PDF" });
     }
 
@@ -86,7 +91,8 @@ async function uploadDocument(req, res) {
       .single();
 
     if (docError) {
-      await supabaseAdmin.storage.from("documents").remove([storagePath]);
+      const userSupabase = createUserSupabaseClient(req.accessToken);
+      await userSupabase.storage.from("documents").remove([storagePath]);
       return res.status(500).json({ error: "Failed to save document metadata" });
     }
 
@@ -124,7 +130,8 @@ async function uploadDocument(req, res) {
       if (chunkError) {
         console.error("document_chunks insert error:", chunkError.message, chunkError.code, chunkError.details);
         await supabaseAdmin.from("documents").delete().eq("id", documentId);
-        await supabaseAdmin.storage.from("documents").remove([storagePath]);
+        const userSupabase = createUserSupabaseClient(req.accessToken);
+        await userSupabase.storage.from("documents").remove([storagePath]);
         return res.status(500).json({ error: "Failed to save document chunks" });
       }
     }
@@ -135,7 +142,8 @@ async function uploadDocument(req, res) {
       chunkCount: chunks.length,
     });
   } catch (err) {
-    await supabaseAdmin.storage.from("documents").remove([storagePath]).catch(() => {});
+    const userSupabase = createUserSupabaseClient(req.accessToken);
+    await userSupabase.storage.from("documents").remove([storagePath]).catch(() => {});
     return res.status(500).json({ error: "Upload failed" });
   }
 }
@@ -239,7 +247,8 @@ async function getSignedUrl(req, res) {
       return res.status(404).json({ error: "Document not found" });
     }
 
-    const { data, error } = await supabaseAdmin.storage
+    const userSupabase = createUserSupabaseClient(req.accessToken);
+    const { data, error } = await userSupabase.storage
       .from("documents")
       .createSignedUrl(document.storage_path, 3600);
 
