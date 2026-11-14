@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Send } from "lucide-react";
 import MicrophoneButton from "../components/MicrophoneButton";
+import { MessageContent, MessageActions } from "../components/MessageContent";
 import { fetchDocuments, type DocumentItem } from "../services/documents";
 import {
   fetchConversations,
@@ -24,6 +25,7 @@ export default function Assistant() {
   const [error, setError] = useState("");
   const [docsLoading, setDocsLoading] = useState(true);
   const [voiceText, setVoiceText] = useState("");
+  const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
 
   const combinedQuestion = manualText + (voiceText ? ` ${voiceText}` : "");
 
@@ -102,6 +104,20 @@ export default function Assistant() {
     }
   };
 
+  const handleRegenerate = async (messageId: string, question: string) => {
+    if (!selectedDocId) return;
+    setRegeneratingId(messageId);
+    setError("");
+    try {
+      const newMessages = await sendMessage(selectedConvId!, question);
+      setMessages(newMessages);
+    } catch (err: any) {
+      setError(err?.response?.data?.error || "Failed to regenerate answer.");
+    } finally {
+      setRegeneratingId(null);
+    }
+  };
+
   const handleTranscript = (text: string) => {
     setVoiceText(text);
   };
@@ -156,17 +172,18 @@ export default function Assistant() {
             )}
             {messages.map((m) => (
               <div key={m.id} className={`message-bubble max-w-[80%] rounded-xl px-4 py-3 text-sm ${m.role === "user" ? "ml-auto theme-message-user" : "mr-auto theme-message-assistant"}`}>
-                <p className="whitespace-pre-wrap">{m.content}</p>
-                {m.role === "assistant" && m.sources?.length > 0 && (
-                  <div className="mt-2 border-t theme-border pt-2 text-xs theme-text-muted">
-                    Sources:{" "}
-                    {m.sources.map((s, i) => (
-                      <span key={i} className="mr-2">
-                        {s.documentName}
-                        {s.pageNumber ? ` (p.${s.pageNumber})` : ""} [chunk {s.chunkIndex}]
-                      </span>
-                    ))}
-                  </div>
+                {m.role === "user" ? (
+                  <p className="whitespace-pre-wrap">{m.content}</p>
+                ) : (
+                  <>
+                    <MessageContent content={m.content} sources={m.sources} />
+                    <MessageActions
+                      messageId={m.id}
+                      content={m.content}
+                      onRegenerate={selectedConvId ? () => handleRegenerate(m.id, combinedQuestion) : undefined}
+                      isRegenerating={regeneratingId === m.id}
+                    />
+                  </>
                 )}
               </div>
             ))}
