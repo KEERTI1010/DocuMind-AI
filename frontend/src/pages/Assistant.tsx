@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Send, X } from "lucide-react";
+import { Send } from "lucide-react";
 import MicrophoneButton from "../components/MicrophoneButton";
 import { fetchDocuments, type DocumentItem } from "../services/documents";
 import {
@@ -19,10 +19,13 @@ export default function Assistant() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConvId, setSelectedConvId] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [question, setQuestion] = useState("");
+  const [manualText, setManualText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [docsLoading, setDocsLoading] = useState(true);
+  const [voiceText, setVoiceText] = useState("");
+
+  const combinedQuestion = manualText + (voiceText ? ` ${voiceText}` : "");
 
   useEffect(() => {
     const doc = searchParams.get("doc");
@@ -75,7 +78,7 @@ export default function Assistant() {
   }, [messages]);
 
   const handleSend = async () => {
-    const q = question.trim();
+    const q = combinedQuestion.trim();
     if (!q || !selectedDocId) return;
 
     setLoading(true);
@@ -90,7 +93,8 @@ export default function Assistant() {
       }
       const newMessages = await sendMessage(convId, q);
       setMessages(newMessages);
-      setQuestion("");
+      setManualText("");
+      setVoiceText("");
     } catch (err: any) {
       setError(err?.response?.data?.error || "Failed to get answer.");
     } finally {
@@ -99,7 +103,7 @@ export default function Assistant() {
   };
 
   const handleTranscript = (text: string) => {
-    setQuestion((prev) => (prev ? `${prev} ${text}` : text));
+    setVoiceText(text);
   };
 
   return (
@@ -175,8 +179,8 @@ export default function Assistant() {
             <div className="flex gap-2">
               <MicrophoneButton onTranscript={handleTranscript} disabled={!selectedDocId || loading} />
               <input
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
+                value={combinedQuestion}
+                onChange={(e) => setManualText(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -188,17 +192,8 @@ export default function Assistant() {
                 disabled={!selectedDocId || loading}
               />
               <button
-                type="button"
-                onClick={() => setQuestion("")}
-                disabled={!question.trim()}
-                className="rounded-lg border theme-border theme-surface-alt px-2 py-2 text-sm theme-text-muted hover:theme-surface disabled:opacity-60 transition"
-                title="Clear"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-              <button
                 onClick={handleSend}
-                disabled={!selectedDocId || loading || !question.trim()}
+                disabled={!selectedDocId || loading || !combinedQuestion.trim()}
                 className="inline-flex items-center gap-2 rounded-lg theme-primary px-4 py-2 text-sm font-medium text-white hover:theme-primary-hover disabled:opacity-60"
               >
                 <Send className="h-4 w-4" />

@@ -4,7 +4,6 @@ const { supabaseAdmin } = require("../config/supabase");
 const STOP_WORDS = new Set(["the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "by", "is", "are", "was", "were", "be", "been", "this", "that", "it", "as", "from"]);
 
 const COMMON_CORRECTIONS = {
-  "login": "logic",
   "binry": "binary",
   "arry": "array",
   "functon": "function",
@@ -249,12 +248,12 @@ function correctQuery(question, chunks) {
   const tokens = tokenize(question);
   let corrected = false;
   const correctedTokens = tokens.map((token) => {
-    if (COMMON_CORRECTIONS[token]) {
+    if (vocabSet.has(token)) return token;
+    if (token.length < 4) return token;
+    if (COMMON_CORRECTIONS[token] && vocabSet.has(COMMON_CORRECTIONS[token])) {
       corrected = true;
       return COMMON_CORRECTIONS[token];
     }
-    if (vocabSet.has(token)) return token;
-    if (token.length < 4) return token;
     let bestMatch = token;
     let bestDist = Infinity;
     for (const v of vocab) {

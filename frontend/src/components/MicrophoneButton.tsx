@@ -32,7 +32,6 @@ export default function MicrophoneButton({ onTranscript, disabled }: MicrophoneB
   const recRef = useRef<SpeechRecognitionCtor extends new () => any ? InstanceType<SpeechRecognitionCtor> : any>(null);
   const onTranscriptRef = useRef(onTranscript);
   const finalTextRef = useRef("");
-  const processedFinalIndexRef = useRef(-1);
 
   useEffect(() => {
     onTranscriptRef.current = onTranscript;
@@ -52,7 +51,6 @@ export default function MicrophoneButton({ onTranscript, disabled }: MicrophoneB
       onTranscriptRef.current(finalTextRef.current);
     }
     finalTextRef.current = "";
-    processedFinalIndexRef.current = -1;
     setRecording(false);
   };
 
@@ -81,30 +79,24 @@ export default function MicrophoneButton({ onTranscript, disabled }: MicrophoneB
     rec.interimResults = true;
     rec.onstart = () => {
       finalTextRef.current = "";
-      processedFinalIndexRef.current = -1;
       setRecording(true);
     };
     rec.onresult = (e: any) => {
-      let interim = "";
-      let newFinal = "";
       const results = e.results;
-      const startIdx = processedFinalIndexRef.current + 1;
+      const finalParts: string[] = [];
+      let latestInterim = "";
 
-      for (let i = startIdx; i < results.length; i++) {
+      for (let i = 0; i < results.length; i++) {
         const transcript = results[i][0].transcript;
         if (results[i].isFinal) {
-          newFinal += (newFinal ? " " : "") + transcript;
-          processedFinalIndexRef.current = i;
+          finalParts.push(transcript);
         } else {
-          interim += (interim ? " " : "") + transcript;
+          latestInterim = transcript;
         }
       }
 
-      if (newFinal) {
-        finalTextRef.current = (finalTextRef.current + (finalTextRef.current ? " " : "") + newFinal).replace(/\s+/g, " ").trim();
-      }
-
-      const displayText = finalTextRef.current + (interim ? ` ${interim}` : "");
+      finalTextRef.current = finalParts.join(" ").replace(/\s+/g, " ").trim();
+      const displayText = finalTextRef.current + (latestInterim ? ` ${latestInterim}` : "");
       onTranscriptRef.current(displayText);
     };
     rec.onerror = (e: any) => {
