@@ -39,6 +39,10 @@ export default function AvatarPicker({ currentAvatarId, onAvatarChange, disabled
             alt="Profile avatar"
             className="h-20 w-20 rounded-full object-cover border-2 border-theme-border bg-theme-surface-alt cursor-pointer hover:scale-105 transition"
             onClick={() => setOpen(true)}
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = getAvatarUrl("default");
+            }}
           />
         ) : (
           <div
@@ -82,9 +86,13 @@ export default function AvatarPicker({ currentAvatarId, onAvatarChange, disabled
                   className={`relative h-14 w-14 rounded-xl border-2 transition-all duration-200 flex items-center justify-center ${isSelected(avatar.id) ? "border-theme-primary bg-theme-primary-soft" : "border-theme-border bg-theme-surface-alt hover:border-theme-primary hover:bg-theme-primary-soft"}`}
                 >
                   <img
-                    src={getAvatarUrl(avatar.id)}
+                    src={avatar.url}
                     alt={avatar.name}
                     className="h-10 w-10 rounded-lg object-cover"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = getAvatarUrl("default");
+                    }}
                   />
                   {isSelected(avatar.id) && (
                     <div className="absolute bottom-1 right-1 h-5 w-5 rounded-full bg-theme-primary flex items-center justify-center text-white shadow-sm">
