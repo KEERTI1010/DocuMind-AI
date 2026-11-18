@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { supabaseAdmin } = require("./config/supabase");
+const { generalLimiter } = require("./middleware/rateLimiter");
 const authRoutes = require("./routes/authRoutes");
 const documentRoutes = require("./routes/documentRoutes");
 const conversationRoutes = require("./routes/conversationRoutes");
@@ -10,8 +11,13 @@ const messageRoutes = require("./routes/messageRoutes");
 
 const app = express();
 
+// Trust the first proxy hop (Render load balancer) for correct client IP detection.
+// Do not blindly trust arbitrary proxy headers beyond this setting.
+app.set("trust proxy", true);
+
 app.use(cors());
 app.use(express.json());
+app.use(generalLimiter);
 
 app.get("/", (req, res) => {
   res.json({ message: "DocuMind AI backend is running" });
